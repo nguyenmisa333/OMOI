@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer'
-import QRCode from 'qrcode'
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -30,8 +29,6 @@ interface BookingEmailData {
   restaurantPhone?: string
 }
 
-const QR_CID = 'qr-code@omoi'
-
 function formatDate(isoDate: string): string {
   try {
     return new Date(isoDate).toLocaleDateString('de-DE', {
@@ -41,7 +38,7 @@ function formatDate(isoDate: string): string {
 }
 
 // Build email using string concatenation to avoid nested backtick issues
-async function buildEmail(data: BookingEmailData): Promise<{ html: string; qrBuffer: Buffer | null }> {
+async function buildEmail(data: BookingEmailData): Promise<string> {
   const name = data.restaurantName || 'OMOI · 思い'
   const address = data.restaurantAddress || 'Hauptstätter Str. 57, 70178 Stuttgart'
   const confirmed = data.status === 'CONFIRMED'
@@ -54,15 +51,7 @@ async function buildEmail(data: BookingEmailData): Promise<{ html: string; qrBuf
     : 'Ihre Anfrage wird geprüft. Wir melden uns in Kürze.'
 
   const confirmUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000') + '/booking/confirm?code=' + data.bookingCode
-
-  // Generate QR as Buffer → CID attachment (works in all email clients)
-  let qrBuffer: Buffer | null = null
-  try {
-    qrBuffer = await QRCode.toBuffer(confirmUrl, {
-      width: 240, margin: 2, color: { dark: '#3b1f0a', light: '#ffffff' },
-      type: 'png',
-    } as Parameters<typeof QRCode.toBuffer>[1])
-  } catch { /* skip */ }
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=3b1f0a&bgcolor=ffffff&data=' + encodeURIComponent(confirmUrl)
 
   // ── Sections ──────────────────────────────────────────────────────────────
   const noteSection = data.specialNote
@@ -72,15 +61,11 @@ async function buildEmail(data: BookingEmailData): Promise<{ html: string; qrBuf
       + '</div>'
     : ''
 
-  const qrSection = qrBuffer
-    ? '<div style="margin:0 24px 20px;background:white;border:2px dashed #d4c4a8;border-radius:16px;padding:20px;text-align:center;">'
-      + '<p style="font-size:9px;font-weight:700;color:#a89070;letter-spacing:3px;text-transform:uppercase;margin:0 0 12px;">Ihr QR-Code</p>'
-      + '<img src="cid:' + QR_CID + '" alt="QR Code" width="160" height="160" style="border-radius:10px;display:block;margin:0 auto;" />'
-      + '<p style="font-size:11px;color:#a89070;margin:12px 0 0;line-height:1.4;">Zeigen Sie diesen Code dem Personal für schnellen Check-in.</p>'
-      + '</div>'
-    : '<div style="margin:0 24px 20px;text-align:center;">'
-      + '<a href="' + confirmUrl + '" style="display:inline-block;padding:10px 24px;background:#3b1f0a;color:white;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;">📱 QR-Code ansehen</a>'
-      + '</div>'
+  const qrSection = '<div style="margin:0 24px 20px;background:white;border:2px dashed #d4c4a8;border-radius:16px;padding:20px;text-align:center;">'
+    + '<p style="font-size:9px;font-weight:700;color:#a89070;letter-spacing:3px;text-transform:uppercase;margin:0 0 12px;">Ihr QR-Code</p>'
+    + '<a href="' + confirmUrl + '"><img src="' + qrUrl + '" alt="QR Code" width="160" height="160" style="border-radius:10px;display:block;margin:0 auto;" /></a>'
+    + '<p style="font-size:11px;color:#a89070;margin:12px 0 0;line-height:1.4;">Zeigen Sie diesen Code dem Personal für schnellen Check-in.</p>'
+    + '</div>'
 
   let promoSection = ''
   if (data.firstTimePromo) {
@@ -198,7 +183,7 @@ async function buildEmail(data: BookingEmailData): Promise<{ html: string; qrBuf
 
     + '</div></body></html>'
 
-  return { html, qrBuffer }
+  return html
 }
 
 export async function sendBookingConfirmation(data: BookingEmailData): Promise<boolean> {
@@ -217,20 +202,18 @@ export async function sendBookingConfirmation(data: BookingEmailData): Promise<b
       ? '✅ Reservierung bestätigt — ' + formatDate(data.date) + ' um ' + data.startTime + ' | ' + name
       : '📋 Reservierung eingegangen — ' + formatDate(data.date) + ' um ' + data.startTime + ' | ' + name
 
-    const { html, qrBuffer } = await buildEmail(data)
+    const html = await buildEmail(data)
 
     await transporter.sendMail({
       from: '"' + name + '" <' + process.env.NODEMAILER_USER + '>',
+      replyTo: process.env.NODEMAILER_USER,
       to: data.guestEmail,
       subject,
       html,
-      attachments: qrBuffer ? [{
-        filename: 'qr-code.png',
-        content: qrBuffer,
-        cid: QR_CID,
-        contentType: 'image/png',
-        contentDisposition: 'inline',
-      }] : [],
+      headers: {
+        'X-Mailer': 'OMOI Reservation System',
+        'Precedence': 'bulk',
+      },
     })
 
     console.log('[Email] Sent to ' + data.guestEmail + ' — ' + data.bookingCode)
