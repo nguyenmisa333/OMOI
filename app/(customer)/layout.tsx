@@ -8,6 +8,7 @@ import BottomNav from '@/components/shared/BottomNav'
 const navLinks = [
   { href: '/', icon: 'home', label: 'Startseite' },
   { href: '/booking', icon: 'event_seat', label: 'Reservieren' },
+  { href: '/account', icon: 'history', label: 'Verlauf' },
   { href: '/kontakt', icon: 'call', label: 'Kontakt' },
   { href: '/ueber-uns', icon: 'info', label: 'Über uns' },
   { href: '/impressum', icon: 'gavel', label: 'Impressum' },
@@ -66,7 +67,7 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
             </div>
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.slice(0, 4).map((item) => (
+              {navLinks.slice(0, 5).map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}

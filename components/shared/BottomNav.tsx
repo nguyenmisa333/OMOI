@@ -7,7 +7,6 @@ const navItems = [
   { href: '/', icon: 'home', label: 'Startseite' },
   { href: '/booking', icon: 'event_seat', label: 'Reservieren' },
   { href: '/account', icon: 'history', label: 'Verlauf' },
-  { href: '/account', icon: 'person', label: 'Konto' },
 ]
 
 export default function BottomNav() {
