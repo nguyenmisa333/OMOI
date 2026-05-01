@@ -40,17 +40,39 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                 <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">VERLAUF</span>
               )}
             </Link>
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-stone-200 bg-surface-container">
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-stone-200 bg-surface-container md:hidden">
               <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                 <span className="material-symbols-outlined">person</span>
               </div>
             </div>
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-1">
+              {[
+                { href: '/', icon: 'home', label: 'Startseite' },
+                { href: '/booking', icon: 'event_seat', label: 'Reservieren' },
+                { href: '/kontakt', icon: 'call', label: 'Kontakt' },
+                { href: '/ueber-uns', icon: 'info', label: 'Über uns' },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    (item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href))
+                      ? 'bg-amber-100 text-amber-900'
+                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           </div>
         </header>
       )}
 
       {/* Main Content */}
-      <main className={isConfirmPage ? '' : 'pt-16 pb-24'}>
+      <main className={isConfirmPage ? '' : 'pt-16 pb-24 md:pb-8'}>
         {children}
       </main>
 

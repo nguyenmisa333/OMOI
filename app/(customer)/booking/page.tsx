@@ -137,7 +137,7 @@ export default function BookingPage() {
   return (
     <div className="bg-background">
       {/* Hero */}
-      <div className="relative h-44 overflow-hidden">
+      <div className="relative h-44 md:h-56 lg:h-64 overflow-hidden">
         <img
           src="/images/hero-cafe.jpg"
           alt="OMOI Cafe"
@@ -145,14 +145,14 @@ export default function BookingPage() {
           style={{ objectPosition: 'center 40%' }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70 flex flex-col items-center justify-center text-center px-4">
-          <img src="/images/omoi-logo.png" alt="OMOI" className="h-7 object-contain invert brightness-200 mb-2" />
-          <h1 className="text-white text-xl font-bold">Tisch reservieren</h1>
+          <img src="/images/omoi-logo.png" alt="OMOI" className="h-7 md:h-10 object-contain invert brightness-200 mb-2" />
+          <h1 className="text-white text-xl md:text-3xl font-bold">Tisch reservieren</h1>
           <p className="text-white/75 text-xs mt-1">Hauptstätter Str. 57 · Stuttgart</p>
         </div>
       </div>
 
       {/* Form — no negative margin card, just flat section */}
-      <div className="px-4 py-6 pb-28 space-y-4 max-w-lg mx-auto">
+      <div className="px-4 md:px-6 py-6 pb-28 md:pb-12 space-y-4 max-w-lg md:max-w-2xl mx-auto">
 
         {/* Error */}
         {error && (
