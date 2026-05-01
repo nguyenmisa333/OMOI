@@ -28,6 +28,7 @@ const allNavItems = [
   { href: '/admin/waitlist',  icon: 'group',            label: 'Warteliste',      minLevel: 1 },
   { href: '/admin/floor',     icon: 'layers',           label: 'Tischplan',       minLevel: 1 },
   { href: '/admin/tables',    icon: 'table_restaurant', label: 'Tischverwaltung', minLevel: 3 },
+  { href: '/admin/links',     icon: 'link',             label: 'Link-Verwaltung', minLevel: 3 },
   { href: '/admin/settings',  icon: 'tune',             label: 'Einstellungen',   minLevel: 4 },
   { href: '/admin/staff',     icon: 'manage_accounts',  label: 'Team-Verwaltung', minLevel: 4 },
 ]
