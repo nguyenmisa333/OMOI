@@ -12,17 +12,21 @@ function roleLevel(role: StaffRole): number {
   return { STAFF: 1, MANAGER: 3, ADMIN: 4, OWNER: 4 }[role] ?? 0
 }
 
-const mobileNavItems = [
-  { href: '/admin',          icon: 'dashboard',         label: 'Home',       minLevel: 1 },
-  { href: '/admin/bookings', icon: 'calendar_month',    label: 'Termine',    minLevel: 1 },
-  { href: '/admin/waitlist', icon: 'group',             label: 'Warteliste', minLevel: 1 },
-  { href: '/admin/floor',    icon: 'layers',            label: 'Tischplan',  minLevel: 1 },
+const adminNavItems = [
+  { href: '/admin',          icon: 'dashboard',        label: 'Übersicht',         minLevel: 1 },
+  { href: '/admin/bookings', icon: 'event_available',  label: 'Reservierungen',    minLevel: 1 },
+  { href: '/admin/waitlist', icon: 'group',            label: 'Warteliste',        minLevel: 1 },
+  { href: '/admin/floor',    icon: 'layers',           label: 'Tischplan',         minLevel: 1 },
+  { href: '/admin/tables',   icon: 'table_restaurant', label: 'Tischverwaltung',   minLevel: 3 },
+  { href: '/admin/settings', icon: 'tune',             label: 'Einstellungen',     minLevel: 3 },
+  { href: '/admin/staff',    icon: 'manage_accounts',  label: 'Team-Verwaltung',   minLevel: 3 },
 ]
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     fetch('/api/auth/me', { credentials: 'include' })
@@ -31,6 +35,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       .catch(() => {})
   }, [])
 
+  // Close menu on route change
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
+
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
     router.push('/admin/login')
@@ -38,7 +47,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   const level = session ? roleLevel(session.role) : 0
-  const visibleMobileNav = mobileNavItems.filter(i => level >= i.minLevel)
+  const visibleNavItems = adminNavItems.filter(i => level >= i.minLevel)
 
   return (
     <div className="min-h-screen bg-background text-on-background antialiased">
@@ -49,6 +58,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {/* Top App Bar */}
         <header className="sticky top-0 z-40 flex justify-between items-center px-4 sm:px-6 h-16 w-full bg-[#fdfbf7] text-[#3b1f0a] text-sm font-medium border-b border-stone-200 shadow-sm shadow-[#3b1f0a]/5">
           <div className="flex items-center gap-4 lg:gap-6 min-w-0">
+            {/* Hamburger — mobile/tablet only */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="lg:hidden material-symbols-outlined text-stone-700 hover:bg-stone-100 p-2 rounded-full transition-colors active:scale-95"
+            >
+              {menuOpen ? 'close' : 'menu'}
+            </button>
             <div className="flex items-center gap-3">
               <img src="/images/omoi-logo.png" alt="OMOI" className="h-5 object-contain" />
               <span className="px-2 py-0.5 bg-primary-container text-white text-[10px] font-bold rounded-md uppercase tracking-wider">Admin</span>
@@ -70,13 +86,50 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
+        {/* Mobile slide-down menu */}
+        {menuOpen && (
+          <>
+            <div
+              className="fixed inset-0 bg-black/30 z-30 lg:hidden"
+              onClick={() => setMenuOpen(false)}
+            />
+            <div className="fixed top-16 left-0 right-0 z-30 bg-[#fdfbf7] border-b border-stone-200 shadow-xl rounded-b-2xl lg:hidden">
+              <nav className="flex flex-col p-3 gap-1 max-h-[70vh] overflow-y-auto">
+                {visibleNavItems.map((item) => {
+                  const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href)
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all active:scale-[0.98] ${
+                        isActive
+                          ? 'bg-primary-container text-white'
+                          : 'text-stone-600 hover:bg-stone-100'
+                      }`}
+                    >
+                      <span
+                        className="material-symbols-outlined text-[20px]"
+                        style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
+                      >
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </Link>
+                  )
+                })}
+              </nav>
+            </div>
+          </>
+        )}
+
         {children}
       </div>
 
-
+      {/* Bottom Nav — mobile only, quick access */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#fdfbf7]/95 backdrop-blur border-t border-stone-200 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
         <div className="grid grid-cols-4 gap-1 max-w-xl mx-auto items-end">
-          {visibleMobileNav.map((item) => {
+          {adminNavItems.slice(0, 4).filter(i => level >= i.minLevel).map((item) => {
             const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href)
             return (
               <Link
