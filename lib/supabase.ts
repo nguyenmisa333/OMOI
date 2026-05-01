@@ -1,22 +1,29 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+let _client: SupabaseClient | null = null
 
-// Server-side admin client — bypasses RLS
-// Lazy init to avoid crash during static build when env vars are not yet available
-let _supabase: SupabaseClient | null = null
-
-export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    if (!_supabase) {
-      if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Supabase environment variables are not configured')
-      }
-      _supabase = createClient(supabaseUrl, supabaseServiceKey, {
-        auth: { persistSession: false },
-      })
+function getClient(): SupabaseClient {
+  if (!_client) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+      throw new Error('Missing SUPABASE env vars')
     }
-    return (_supabase as any)[prop]
+    _client = createClient(url, key, {
+      auth: { persistSession: false },
+    })
+  }
+  return _client
+}
+
+// Server-side admin client — lazy initialized
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_, prop) {
+    const client = getClient()
+    const value = (client as any)[prop]
+    if (typeof value === 'function') {
+      return value.bind(client)
+    }
+    return value
   },
 })
