@@ -262,22 +262,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Send confirmation email (non-blocking) ────────────────────
-    sendBookingConfirmation({
-      guestName: name,
-      guestEmail: email || '',
-      bookingCode: booking.bookingCode,
-      date,
-      startTime: time,
-      endTime,
-      guestCount,
-      status: booking.status as 'PENDING' | 'CONFIRMED',
-      specialNote: specialNote || undefined,
-      firstTimePromo: firstTimePromo as { type: 'PERCENT' | 'PRODUCT'; percent?: number; productName?: string; message?: string } | null,
-      restaurantName: (s.restaurantName as string) || undefined,
-      restaurantAddress: (s.restaurantAddress as string) || undefined,
-      restaurantPhone: (s.restaurantPhone as string) || undefined,
-    }).catch(err => console.error('[Email] Background send failed:', err))
+    // ── Send confirmation email (must await on Vercel) ──────────────
+    try {
+      await sendBookingConfirmation({
+        guestName: name,
+        guestEmail: email || '',
+        bookingCode: booking.bookingCode,
+        date,
+        startTime: time,
+        endTime,
+        guestCount,
+        status: booking.status as 'PENDING' | 'CONFIRMED',
+        specialNote: specialNote || undefined,
+        firstTimePromo: firstTimePromo as { type: 'PERCENT' | 'PRODUCT'; percent?: number; productName?: string; message?: string } | null,
+        restaurantName: (s.restaurantName as string) || undefined,
+        restaurantAddress: (s.restaurantAddress as string) || undefined,
+        restaurantPhone: (s.restaurantPhone as string) || undefined,
+      })
+    } catch (err) {
+      console.error('[Email] Send failed:', err)
+    }
 
     return NextResponse.json({
       bookingCode: booking.bookingCode, bookingId: booking.id,
