@@ -53,11 +53,21 @@ export default function LinksPage() {
             OMOI · 思い
           </h1>
           <p
-            className="text-white/80 text-sm max-w-xs mx-auto leading-relaxed"
+            className="text-white/70 text-[11px] tracking-[3px] uppercase font-medium mb-1"
             style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}
           >
-            Japanese Café & Matcha Bar 🍵
-            <br />
+            bedeutet Gefühl, Gedanke, Erinnerung
+          </p>
+          <p
+            className="text-white/90 text-sm font-semibold tracking-widest uppercase mb-1"
+            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}
+          >
+            BRUNCH · MATCHA · ONIGIRIRAZU
+          </p>
+          <p
+            className="text-white/60 text-xs"
+            style={{ textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}
+          >
             Hauptstätter Str. 57 · Stuttgart
           </p>
 
