@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
     return res
   } catch (err) {
     console.error('[Auth] Login error:', err)
-    return NextResponse.json({ error: 'Server-Fehler' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: 'Server-Fehler', detail: msg }, { status: 500 })
   }
 }
