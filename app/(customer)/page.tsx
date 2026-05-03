@@ -6,6 +6,12 @@ import { useState, useEffect } from 'react'
 interface SiteSettings {
   openTuFr: string; closeTuFr: string
   openSaSo: string; closeSaSo: string
+  openDi: string; closeDi: string
+  openMi: string; closeMi: string
+  openDo: string; closeDo: string
+  openFr: string; closeFr: string
+  openSa: string; closeSa: string
+  openSo: string; closeSo: string
   restaurantName: string; restaurantAddress: string
   restaurantPhone: string; restaurantEmail: string
   restaurantWebsite: string; restaurantGoogleMaps: string
@@ -17,7 +23,10 @@ interface SiteSettings {
 }
 
 const defaultSite: SiteSettings = {
-  openTuFr: '10:00', closeTuFr: '20:00', openSaSo: '11:00', closeSaSo: '22:00',
+  openTuFr: '12:00', closeTuFr: '21:00', openSaSo: '12:00', closeSaSo: '22:00',
+  openDi: '12:00', closeDi: '21:00', openMi: '12:00', closeMi: '21:00',
+  openDo: '12:00', closeDo: '21:00', openFr: '12:00', closeFr: '22:00',
+  openSa: '12:00', closeSa: '22:00', openSo: '12:00', closeSo: '20:00',
   restaurantName: 'OMOI · 思い', restaurantAddress: 'Hauptstätter Str. 57, 70178 Stuttgart',
   restaurantPhone: '', restaurantEmail: '', restaurantWebsite: '',
   restaurantGoogleMaps: 'https://maps.app.goo.gl/Vy3wRgdSbauSvcxT9',
@@ -27,10 +36,26 @@ const defaultSite: SiteSettings = {
   amenityTakeaway: false, amenityCreditCard: true,
 }
 
+// Helper: get open/close for a day-of-week
+function getDayHours(s: SiteSettings, dow: number): { open: string; close: string } | null {
+  if (dow === 1) return null // Monday Ruhetag
+  const map: Record<number, [string, string, string, string]> = {
+    2: [s.openDi, s.closeDi, s.openTuFr, s.closeTuFr],
+    3: [s.openMi, s.closeMi, s.openTuFr, s.closeTuFr],
+    4: [s.openDo, s.closeDo, s.openTuFr, s.closeTuFr],
+    5: [s.openFr, s.closeFr, s.openTuFr, s.closeTuFr],
+    6: [s.openSa, s.closeSa, s.openSaSo, s.closeSaSo],
+    0: [s.openSo, s.closeSo, s.openSaSo, s.closeSaSo],
+  }
+  const d = map[dow]
+  if (!d) return null
+  return { open: d[0] || d[2] || '12:00', close: d[1] || d[3] || '21:00' }
+}
+
 export default function HomePage() {
   const [date, setDate] = useState('')
   const [guests, setGuests] = useState('2')
-  const [time, setTime] = useState('10:00')
+  const [time, setTime] = useState('12:00')
   const [today, setToday] = useState('')
   const [site, setSite] = useState<SiteSettings>(defaultSite)
 
@@ -45,18 +70,16 @@ export default function HomePage() {
   function getOpenStatus(): { isOpen: boolean; label: string; todayHours: string } {
     const now = new Date()
     const dow = now.getDay()
-    if (dow === 1) return { isOpen: false, label: 'Ruhetag', todayHours: 'Montag: Ruhetag' }
+    const hours = getDayHours(site, dow)
+    if (!hours) return { isOpen: false, label: 'Ruhetag', todayHours: 'Montag: Ruhetag' }
 
-    const isWeekend = dow === 0 || dow === 6
-    const openTime = isWeekend ? site.openSaSo : site.openTuFr
-    const closeTime = isWeekend ? site.closeSaSo : site.closeTuFr
     const nowStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-    const isOpen = nowStr >= openTime && nowStr < closeTime
+    const isOpen = nowStr >= hours.open && nowStr < hours.close
 
     return {
       isOpen,
-      label: isOpen ? `Geöffnet bis ${closeTime}` : `Öffnet um ${openTime}`,
-      todayHours: `${openTime} – ${closeTime} Uhr`,
+      label: isOpen ? `Geöffnet bis ${hours.close}` : `Öffnet um ${hours.open}`,
+      todayHours: `${hours.open} – ${hours.close} Uhr`,
     }
   }
 

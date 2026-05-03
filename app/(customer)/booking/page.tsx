@@ -20,7 +20,7 @@ export default function BookingPage() {
   })
 
   const [slotDuration, setSlotDuration] = useState(30)
-  const [openHours, setOpenHours] = useState({ openTuFr: '10:00', closeTuFr: '20:00', openSaSo: '11:00', closeSaSo: '22:00' })
+  const [settings, setSettings] = useState<Record<string, string>>({})
   const [blockedSlots, setBlockedSlots] = useState<Array<{date: string; dayOfWeek: number|null; startTime: string; endTime: string}>>([])
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
@@ -38,17 +38,29 @@ export default function BookingPage() {
       fetch('/api/blocked-times').then(r => r.json()).catch(() => ({})),
     ]).then(([s, b]) => {
       if (s.settings?.slotDuration) setSlotDuration(s.settings.slotDuration)
-      if (s.settings) {
-        setOpenHours({
-          openTuFr: s.settings.openTuFr || '08:00',
-          closeTuFr: s.settings.closeTuFr || '18:00',
-          openSaSo: s.settings.openSaSo || '09:00',
-          closeSaSo: s.settings.closeSaSo || '18:00',
-        })
-      }
+      if (s.settings) setSettings(s.settings)
       if (b.blockedSlots) setBlockedSlots(b.blockedSlots)
     })
   }, [])
+
+  // Get opening hours for a specific day of week (0=Sun, 1=Mon, ..., 6=Sat)
+  function getHoursForDay(dow: number): { open: string; close: string } | null {
+    if (dow === 1) return null // Monday closed
+    const dayMap: Record<number, { openKey: string; closeKey: string; legacyOpen: string; legacyClose: string }> = {
+      2: { openKey: 'openDi', closeKey: 'closeDi', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
+      3: { openKey: 'openMi', closeKey: 'closeMi', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
+      4: { openKey: 'openDo', closeKey: 'closeDo', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
+      5: { openKey: 'openFr', closeKey: 'closeFr', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
+      6: { openKey: 'openSa', closeKey: 'closeSa', legacyOpen: 'openSaSo', legacyClose: 'closeSaSo' },
+      0: { openKey: 'openSo', closeKey: 'closeSo', legacyOpen: 'openSaSo', legacyClose: 'closeSaSo' },
+    }
+    const d = dayMap[dow]
+    if (!d) return null
+    return {
+      open: settings[d.openKey] || settings[d.legacyOpen] || '12:00',
+      close: settings[d.closeKey] || settings[d.legacyClose] || '21:00',
+    }
+  }
 
   function isBlocked(date: string, time: string): boolean {
     const dow = new Date(date).getDay()
@@ -63,12 +75,11 @@ export default function BookingPage() {
   function getTimeOptions(): string[] {
     if (!form.date) return []
     const day = new Date(form.date).getDay()
-    if (day === 1) return [] // Monday closed
+    const hours = getHoursForDay(day)
+    if (!hours) return [] // Monday closed
 
-    // Use dynamic open/close hours from settings
-    const isWeekend = day === 0 || day === 6
-    const openTime = isWeekend ? openHours.openSaSo : openHours.openTuFr
-    const closeTime = isWeekend ? openHours.closeSaSo : openHours.closeTuFr
+    const openTime = hours.open
+    const closeTime = hours.close
 
     const [openH, openM] = openTime.split(':').map(Number)
     const [closeH, closeM] = closeTime.split(':').map(Number)

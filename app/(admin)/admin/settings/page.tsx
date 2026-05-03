@@ -19,6 +19,12 @@ interface CafeSettings {
   closeTuFr: string
   openSaSo: string
   closeSaSo: string
+  openDi: string; closeDi: string
+  openMi: string; closeMi: string
+  openDo: string; closeDo: string
+  openFr: string; closeFr: string
+  openSa: string; closeSa: string
+  openSo: string; closeSo: string
   // Neukunden-Aktion
   firstTimePromoEnabled: boolean
   firstTimePromoType: 'PERCENT' | 'PRODUCT'
@@ -72,8 +78,14 @@ export default function SettingsPage() {
   const [settings, setSettings]     = useState<CafeSettings>({
     slotDuration: 30, bookingDuration: 120,
     confirmationMode: 'AUTO', maxAutoConfirmGuests: 16,
-    openTuFr: '10:00', closeTuFr: '20:00',
-    openSaSo: '11:00', closeSaSo: '22:00',
+    openTuFr: '12:00', closeTuFr: '21:00',
+    openSaSo: '12:00', closeSaSo: '22:00',
+    openDi: '12:00', closeDi: '21:00',
+    openMi: '12:00', closeMi: '21:00',
+    openDo: '12:00', closeDo: '21:00',
+    openFr: '12:00', closeFr: '22:00',
+    openSa: '12:00', closeSa: '22:00',
+    openSo: '12:00', closeSo: '20:00',
     firstTimePromoEnabled: false, firstTimePromoType: 'PERCENT',
     firstTimePromoPercent: 10, firstTimePromoProductId: null,
     firstTimePromoMessage: 'Willkommen bei OMOI! Als Neukunde erhalten Sie einen besonderen Rabatt.',
@@ -343,34 +355,38 @@ export default function SettingsPage() {
             <p className="text-xs text-on-surface-variant">Buchbare Zeiten für Kunden</p>
           </div>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-3">
           {[
-            { label: 'Dienstag – Freitag', open: 'openTuFr', close: 'closeTuFr' },
-            { label: 'Samstag – Sonntag',  open: 'openSaSo', close: 'closeSaSo' },
+            { label: 'Dienstag',    open: 'openDi', close: 'closeDi' },
+            { label: 'Mittwoch',    open: 'openMi', close: 'closeMi' },
+            { label: 'Donnerstag',  open: 'openDo', close: 'closeDo' },
+            { label: 'Freitag',     open: 'openFr', close: 'closeFr' },
+            { label: 'Samstag',     open: 'openSa', close: 'closeSa' },
+            { label: 'Sonntag',     open: 'openSo', close: 'closeSo' },
           ].map(row => (
             <div key={row.label} className="flex items-center gap-4 flex-wrap">
-              <span className="w-44 text-sm font-medium text-on-surface shrink-0">{row.label}</span>
+              <span className="w-28 text-sm font-medium text-on-surface shrink-0">{row.label}</span>
               <div className="flex items-center gap-2">
                 <select
-                  value={settings[row.open as keyof CafeSettings] as string}
+                  value={(settings as Record<string, unknown>)[row.open] as string || '12:00'}
                   onChange={e => setSettings(s => ({ ...s, [row.open]: e.target.value }))}
                   className="bg-stone-100 rounded-xl px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-primary-container border-none"
                 >
-                  {genTimeOptions('06:00', '14:00', 30).map(t => <option key={t} value={t}>{t}</option>)}
+                  {genTimeOptions('06:00', '16:00', 30).map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
                 <span className="text-on-surface-variant">–</span>
                 <select
-                  value={settings[row.close as keyof CafeSettings] as string}
+                  value={(settings as Record<string, unknown>)[row.close] as string || '21:00'}
                   onChange={e => setSettings(s => ({ ...s, [row.close]: e.target.value }))}
                   className="bg-stone-100 rounded-xl px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-primary-container border-none"
                 >
-                  {genTimeOptions('14:00', '23:00', 30).map(t => <option key={t} value={t}>{t}</option>)}
+                  {genTimeOptions('14:00', '23:30', 30).map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
             </div>
           ))}
           <div className="flex items-center gap-4">
-            <span className="w-44 text-sm font-medium text-error shrink-0">Montag</span>
+            <span className="w-28 text-sm font-medium text-error shrink-0">Montag</span>
             <span className="px-3 py-2 bg-red-50 text-error text-sm font-semibold rounded-xl">Ruhetag (geschlossen)</span>
           </div>
         </div>

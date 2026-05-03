@@ -6,6 +6,14 @@ export interface CafeSettings {
   bookingDuration: number
   confirmationMode: ConfirmationMode
   maxAutoConfirmGuests: number
+  // Per-day opening hours
+  openDi: string; closeDi: string
+  openMi: string; closeMi: string
+  openDo: string; closeDo: string
+  openFr: string; closeFr: string
+  openSa: string; closeSa: string
+  openSo: string; closeSo: string
+  // Legacy (kept for backward compat)
   openTuFr: string
   closeTuFr: string
   openSaSo: string
@@ -52,9 +60,17 @@ const defaultSettings: CafeSettings = {
   bookingDuration: 120,
   confirmationMode: 'AUTO',
   maxAutoConfirmGuests: 16,
-  openTuFr: '10:00',
-  closeTuFr: '20:00',
-  openSaSo: '11:00',
+  // Per-day defaults (OMOI schedule)
+  openDi: '12:00', closeDi: '21:00',
+  openMi: '12:00', closeMi: '21:00',
+  openDo: '12:00', closeDo: '21:00',
+  openFr: '12:00', closeFr: '22:00',
+  openSa: '12:00', closeSa: '22:00',
+  openSo: '12:00', closeSo: '20:00',
+  // Legacy
+  openTuFr: '12:00',
+  closeTuFr: '21:00',
+  openSaSo: '12:00',
   closeSaSo: '22:00',
   // Promo defaults
   firstTimePromoEnabled: false,
