@@ -368,7 +368,7 @@ export default function SettingsPage() {
               <span className="w-28 text-sm font-medium text-on-surface shrink-0">{row.label}</span>
               <div className="flex items-center gap-2">
                 <select
-                  value={(settings as Record<string, unknown>)[row.open] as string || '12:00'}
+                  value={(settings as unknown as Record<string, string>)[row.open] || '12:00'}
                   onChange={e => setSettings(s => ({ ...s, [row.open]: e.target.value }))}
                   className="bg-stone-100 rounded-xl px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-primary-container border-none"
                 >
@@ -376,7 +376,7 @@ export default function SettingsPage() {
                 </select>
                 <span className="text-on-surface-variant">–</span>
                 <select
-                  value={(settings as Record<string, unknown>)[row.close] as string || '21:00'}
+                  value={(settings as unknown as Record<string, string>)[row.close] || '21:00'}
                   onChange={e => setSettings(s => ({ ...s, [row.close]: e.target.value }))}
                   className="bg-stone-100 rounded-xl px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-primary-container border-none"
                 >
