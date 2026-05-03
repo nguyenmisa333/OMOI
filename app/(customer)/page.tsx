@@ -267,32 +267,34 @@ export default function HomePage() {
             </h3>
             <div className="space-y-2">
               {[
-                { day: 'Montag', hours: 'Ruhetag', closed: true },
-                { day: 'Dienstag', hours: '10:00 – 20:00' },
-                { day: 'Mittwoch', hours: '10:00 – 20:00' },
-                { day: 'Donnerstag', hours: '10:00 – 20:00' },
-                { day: 'Freitag', hours: '10:00 – 22:00' },
-                { day: 'Samstag', hours: '11:00 – 22:00' },
-                { day: 'Sonntag', hours: '11:00 – 19:00' },
+                { day: 'Montag', dow: 1 },
+                { day: 'Dienstag', dow: 2 },
+                { day: 'Mittwoch', dow: 3 },
+                { day: 'Donnerstag', dow: 4 },
+                { day: 'Freitag', dow: 5 },
+                { day: 'Samstag', dow: 6 },
+                { day: 'Sonntag', dow: 0 },
               ].map((item) => {
                 const now = new Date()
-                const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
-                const isToday = dayNames[now.getDay()] === item.day
+                const isToday = now.getDay() === item.dow
+                const hours = getDayHours(site, item.dow)
+                const closed = !hours
+                const hoursStr = closed ? 'Ruhetag' : `${hours.open} – ${hours.close}`
                 return (
                   <div
                     key={item.day}
                     className={`flex justify-between items-center px-4 py-2.5 rounded-xl text-sm ${
-                      item.closed ? 'bg-red-50 text-red-500'
+                      closed ? 'bg-red-50 text-red-500'
                         : isToday ? 'bg-primary-container/10 text-on-surface font-semibold ring-1 ring-primary-container/30'
                         : 'bg-surface-container-low'
                     }`}
                   >
-                    <span className={`${isToday && !item.closed ? 'font-bold' : 'font-medium'}`}>
+                    <span className={`${isToday && !closed ? 'font-bold' : 'font-medium'}`}>
                       {item.day}
                       {isToday && <span className="text-[9px] ml-1.5 text-primary-container font-bold uppercase">Heute</span>}
                     </span>
-                    <span className={item.closed ? 'font-bold' : 'text-on-surface-variant'}>
-                      {item.hours}
+                    <span className={closed ? 'font-bold' : 'text-on-surface-variant'}>
+                      {hoursStr}
                     </span>
                   </div>
                 )
