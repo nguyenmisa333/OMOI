@@ -58,16 +58,21 @@ export default function HomePage() {
   const [time, setTime] = useState('12:00')
   const [today, setToday] = useState('')
   const [site, setSite] = useState<SiteSettings>(defaultSite)
+  const [mounted, setMounted] = useState(false)
+  const [currentDow, setCurrentDow] = useState(-1)
 
   useEffect(() => {
+    setMounted(true)
     setToday(new Date().toISOString().split('T')[0])
+    setCurrentDow(new Date().getDay())
     fetch('/api/settings').then(r => r.json()).then(d => {
       if (d.settings) setSite(prev => ({ ...prev, ...d.settings }))
     }).catch(() => {})
   }, [])
 
-  // Determine if currently open
+  // Determine if currently open — only meaningful after mount
   function getOpenStatus(): { isOpen: boolean; label: string; todayHours: string } {
+    if (!mounted) return { isOpen: false, label: '...', todayHours: '...' }
     const now = new Date()
     const dow = now.getDay()
     const hours = getDayHours(site, dow)
@@ -275,8 +280,7 @@ export default function HomePage() {
                 { day: 'Samstag', dow: 6 },
                 { day: 'Sonntag', dow: 0 },
               ].map((item) => {
-                const now = new Date()
-                const isToday = now.getDay() === item.dow
+                const isToday = mounted && currentDow === item.dow
                 const hours = getDayHours(site, item.dow)
                 const closed = !hours
                 const hoursStr = closed ? 'Ruhetag' : `${hours.open} – ${hours.close}`

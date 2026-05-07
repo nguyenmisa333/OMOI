@@ -126,7 +126,11 @@ export default function BookingPage() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Reservierung fehlgeschlagen'); return }
+      if (!res.ok) {
+        const detail = data.detail ? ` (${data.detail})` : ''
+        setError((data.error || 'Reservierung fehlgeschlagen') + detail)
+        return
+      }
 
       // Build confirm URL with promo params
       const confirmParams = new URLSearchParams({ code: data.bookingCode })

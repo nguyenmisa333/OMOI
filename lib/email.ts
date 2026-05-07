@@ -1,12 +1,20 @@
 import nodemailer from 'nodemailer'
+import type { Transporter } from 'nodemailer'
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.NODEMAILER_USER,
-    pass: process.env.NODEMAILER_PASS,
-  },
-})
+let _transporter: Transporter | null = null
+
+function getTransporter(): Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.NODEMAILER_USER,
+        pass: process.env.NODEMAILER_PASS,
+      },
+    })
+  }
+  return _transporter
+}
 
 interface BookingEmailData {
   guestName: string
@@ -204,7 +212,7 @@ export async function sendBookingConfirmation(data: BookingEmailData): Promise<b
 
     const html = await buildEmail(data)
 
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: '"' + name + '" <' + process.env.NODEMAILER_USER + '>',
       replyTo: process.env.NODEMAILER_USER,
       to: data.guestEmail,

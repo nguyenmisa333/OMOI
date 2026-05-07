@@ -296,8 +296,13 @@ export async function POST(request: NextRequest) {
       firstTimePromo,
     })
   } catch (error) {
-    console.error('POST /api/bookings error:', error)
     const message = error instanceof Error ? error.message : String(error)
-    return NextResponse.json({ error: 'Failed to create booking', detail: message }, { status: 500 })
+    const stack = error instanceof Error ? error.stack : undefined
+    console.error('POST /api/bookings error:', message)
+    if (stack) console.error('Stack:', stack)
+    return NextResponse.json(
+      { error: 'Failed to create booking', detail: message },
+      { status: 500 }
+    )
   }
 }
