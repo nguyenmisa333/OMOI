@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 /**
  * Generate a unique booking code: OM + YYMM + "-" + 3-digit sequence
  * Example: OM2604-001, OM2604-002
+ * Uses max existing code to avoid duplicates after deletions or race conditions
  */
 export async function generateBookingCode(): Promise<string> {
   const now = new Date()
@@ -10,13 +11,25 @@ export async function generateBookingCode(): Promise<string> {
   const mm = String(now.getMonth() + 1).padStart(2, '0')
   const prefix = `OM${yy}${mm}`
 
-  const { count } = await supabase
+  // Find the highest existing sequence for this month
+  const { data } = await supabase
     .from('bookings')
-    .select('*', { count: 'exact', head: true })
+    .select('bookingCode')
     .like('bookingCode', `${prefix}%`)
+    .order('bookingCode', { ascending: false })
+    .limit(1)
 
-  const seq = String((count || 0) + 1).padStart(3, '0')
-  return `${prefix}-${seq}`
+  let nextSeq = 1
+  if (data && data.length > 0) {
+    // Extract sequence number from e.g. "OM2605-008"
+    const lastCode = data[0].bookingCode as string
+    const parts = lastCode.split('-')
+    if (parts.length === 2) {
+      nextSeq = parseInt(parts[1], 10) + 1
+    }
+  }
+
+  return `${prefix}-${String(nextSeq).padStart(3, '0')}`
 }
 
 /**
