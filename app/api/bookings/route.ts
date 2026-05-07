@@ -296,7 +296,9 @@ export async function POST(request: NextRequest) {
       firstTimePromo,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = error instanceof Error
+      ? error.message
+      : (typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error))
     const stack = error instanceof Error ? error.stack : undefined
     console.error('POST /api/bookings error:', message)
     if (stack) console.error('Stack:', stack)
