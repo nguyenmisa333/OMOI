@@ -1,7 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+
+interface TimeSlot {
+  time: string
+  status: 'available' | 'blocked' | 'full' | 'past'
+  label?: string
+}
 
 export default function BookingPage() {
   const router = useRouter()
@@ -15,13 +21,14 @@ export default function BookingPage() {
     email: '',
     guestCount: '2',
     date: '',
-    time: '10:00',
+    time: '',
     specialNote: '',
   })
 
-  const [slotDuration, setSlotDuration] = useState(30)
   const [settings, setSettings] = useState<Record<string, string>>({})
-  const [blockedSlots, setBlockedSlots] = useState<Array<{date: string; dayOfWeek: number|null; startTime: string; endTime: string}>>([])
+  const [slots, setSlots] = useState<TimeSlot[]>([])
+  const [slotsLoading, setSlotsLoading] = useState(false)
+  const [dayIsClosed, setDayIsClosed] = useState(false)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
   useEffect(() => {
@@ -33,68 +40,40 @@ export default function BookingPage() {
     setForm((prev) => ({ ...prev, date: tomorrow.toISOString().split('T')[0] }))
 
     // Load settings
-    Promise.all([
-      fetch('/api/settings').then(r => r.json()).catch(() => ({})),
-      fetch('/api/blocked-times').then(r => r.json()).catch(() => ({})),
-    ]).then(([s, b]) => {
-      if (s.settings?.slotDuration) setSlotDuration(s.settings.slotDuration)
+    fetch('/api/settings').then(r => r.json()).then(s => {
       if (s.settings) setSettings(s.settings)
-      if (b.blockedSlots) setBlockedSlots(b.blockedSlots)
-    })
+    }).catch(() => {})
   }, [])
 
-  // Get opening hours for a specific day of week (0=Sun, 1=Mon, ..., 6=Sat)
-  function getHoursForDay(dow: number): { open: string; close: string } | null {
-    if (dow === 1) return null // Monday closed
-    const dayMap: Record<number, { openKey: string; closeKey: string; legacyOpen: string; legacyClose: string }> = {
-      2: { openKey: 'openDi', closeKey: 'closeDi', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
-      3: { openKey: 'openMi', closeKey: 'closeMi', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
-      4: { openKey: 'openDo', closeKey: 'closeDo', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
-      5: { openKey: 'openFr', closeKey: 'closeFr', legacyOpen: 'openTuFr', legacyClose: 'closeTuFr' },
-      6: { openKey: 'openSa', closeKey: 'closeSa', legacyOpen: 'openSaSo', legacyClose: 'closeSaSo' },
-      0: { openKey: 'openSo', closeKey: 'closeSo', legacyOpen: 'openSaSo', legacyClose: 'closeSaSo' },
+  // Fetch availability whenever date or guestCount changes
+  const fetchAvailability = useCallback(async (date: string, guestCount: string) => {
+    if (!date) return
+    setSlotsLoading(true)
+    setSlots([])
+    setDayIsClosed(false)
+    try {
+      const res = await fetch(`/api/bookings/availability?date=${date}&guestCount=${guestCount}`)
+      const data = await res.json()
+      if (data.closed) {
+        setDayIsClosed(true)
+        setSlots([])
+      } else {
+        setSlots(data.slots || [])
+      }
+    } catch {
+      setSlots([])
+    } finally {
+      setSlotsLoading(false)
     }
-    const d = dayMap[dow]
-    if (!d) return null
-    return {
-      open: settings[d.openKey] || settings[d.legacyOpen] || '12:00',
-      close: settings[d.closeKey] || settings[d.legacyClose] || '21:00',
+  }, [])
+
+  useEffect(() => {
+    if (form.date) {
+      fetchAvailability(form.date, form.guestCount)
+      // Reset selected time when date/guests change
+      setForm(prev => ({ ...prev, time: '' }))
     }
-  }
-
-  function isBlocked(date: string, time: string): boolean {
-    const dow = new Date(date).getDay()
-    return blockedSlots.some(slot => {
-      const matchDate = slot.date === date || slot.date === '*'
-      const matchDow  = slot.dayOfWeek !== null && slot.dayOfWeek === dow
-      if (!matchDate && !matchDow) return false
-      return time >= slot.startTime && time < slot.endTime
-    })
-  }
-
-  function getTimeOptions(): string[] {
-    if (!form.date) return []
-    const day = new Date(form.date).getDay()
-    const hours = getHoursForDay(day)
-    if (!hours) return [] // Monday closed
-
-    const openTime = hours.open
-    const closeTime = hours.close
-
-    const [openH, openM] = openTime.split(':').map(Number)
-    const [closeH, closeM] = closeTime.split(':').map(Number)
-    const startMin = openH * 60 + openM
-    const endMin = closeH * 60 + closeM
-
-    const slots: string[] = []
-    for (let cur = startMin; cur < endMin; cur += slotDuration) {
-      const h = Math.floor(cur / 60)
-      const m = cur % 60
-      const t = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
-      if (!isBlocked(form.date, t)) slots.push(t)
-    }
-    return slots
-  }
+  }, [form.date, form.guestCount, fetchAvailability])
 
   function validate(): boolean {
     if (!form.name.trim()) { setError('Bitte geben Sie Ihren Namen ein'); return false }
@@ -149,6 +128,8 @@ export default function BookingPage() {
     }
   }
 
+  const availableCount = slots.filter(s => s.status === 'available').length
+
   return (
     <div className="bg-background">
       {/* Hero */}
@@ -166,7 +147,7 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* Form — no negative margin card, just flat section */}
+      {/* Form */}
       <div className="px-4 md:px-6 py-6 pb-28 md:pb-12 space-y-4 max-w-lg md:max-w-2xl mx-auto">
 
         {/* Error */}
@@ -241,7 +222,7 @@ export default function BookingPage() {
                 type="date"
                 required
                 value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value, time: '10:00' })}
+                onChange={(e) => setForm({ ...form, date: e.target.value, time: '' })}
                 min={today}
                 className="w-full pl-10 pr-2 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface text-sm focus:ring-2 focus:ring-on-primary-container"
               />
@@ -253,7 +234,7 @@ export default function BookingPage() {
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-primary-container text-[18px]">group</span>
               <select
                 value={form.guestCount}
-                onChange={(e) => setForm({ ...form, guestCount: e.target.value })}
+                onChange={(e) => setForm({ ...form, guestCount: e.target.value, time: '' })}
                 className="w-full pl-10 pr-3 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface text-sm focus:ring-2 focus:ring-on-primary-container appearance-none"
               >
                 {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
@@ -264,25 +245,125 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* Time */}
+        {/* ── Time Slot Grid ───────────────────────────────────── */}
         <div>
-          <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1.5">Uhrzeit *</label>
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-primary-container text-[20px]">schedule</span>
-            <select
-              value={form.time}
-              onChange={(e) => setForm({ ...form, time: e.target.value })}
-              className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface text-sm focus:ring-2 focus:ring-on-primary-container appearance-none"
-            >
-              {getTimeOptions().length === 0 ? (
-                <option>Bitte zuerst Datum wählen</option>
-              ) : (
-                getTimeOptions().map((t) => (
-                  <option key={t} value={t}>{t} Uhr</option>
-                ))
-              )}
-            </select>
-          </div>
+          <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-2">
+            Uhrzeit wählen *
+          </label>
+
+          {/* Monday closed */}
+          {dayIsClosed && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-6 text-center">
+              <span className="material-symbols-outlined text-red-400 text-3xl mb-2 block">event_busy</span>
+              <p className="text-red-600 font-semibold text-sm">Montag: Ruhetag</p>
+              <p className="text-red-400 text-xs mt-1">Bitte wählen Sie einen anderen Tag.</p>
+            </div>
+          )}
+
+          {/* Loading */}
+          {slotsLoading && (
+            <div className="flex items-center justify-center py-8">
+              <span className="material-symbols-outlined animate-spin text-on-surface-variant text-2xl">progress_activity</span>
+              <span className="text-sm text-on-surface-variant ml-2">Verfügbarkeit wird geprüft...</span>
+            </div>
+          )}
+
+          {/* No date selected */}
+          {!form.date && !slotsLoading && (
+            <div className="bg-surface-container-low rounded-xl px-4 py-6 text-center">
+              <span className="material-symbols-outlined text-on-surface-variant text-2xl mb-1 block">calendar_today</span>
+              <p className="text-on-surface-variant text-sm">Bitte wählen Sie zuerst ein Datum</p>
+            </div>
+          )}
+
+          {/* Slot grid */}
+          {!slotsLoading && !dayIsClosed && slots.length > 0 && (
+            <>
+              {/* Summary */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="material-symbols-outlined text-on-surface-variant text-[16px]">schedule</span>
+                <span className="text-xs text-on-surface-variant">
+                  {availableCount} von {slots.length} Zeiten verfügbar
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {slots.map((slot) => {
+                  const isSelected = form.time === slot.time
+                  const isAvailable = slot.status === 'available'
+
+                  if (isAvailable) {
+                    return (
+                      <button
+                        key={slot.time}
+                        type="button"
+                        onClick={() => setForm({ ...form, time: slot.time })}
+                        className={`
+                          relative py-3 px-2 rounded-xl text-center transition-all duration-200
+                          ${isSelected
+                            ? 'bg-primary-container text-white ring-2 ring-primary-container shadow-lg scale-[1.02]'
+                            : 'bg-surface-container-low text-on-surface hover:bg-amber-50 hover:ring-1 hover:ring-amber-200 active:scale-95'
+                          }
+                        `}
+                      >
+                        <span className={`text-sm font-bold ${isSelected ? 'text-white' : ''}`}>
+                          {slot.time}
+                        </span>
+                        <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-emerald-600'}`}>
+                          verfügbar
+                        </span>
+                        {isSelected && (
+                          <span className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                            <span className="material-symbols-outlined text-primary-container text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                          </span>
+                        )}
+                      </button>
+                    )
+                  }
+
+                  // Disabled slot (blocked / full / past)
+                  return (
+                    <div
+                      key={slot.time}
+                      className="py-3 px-2 rounded-xl text-center bg-stone-100 opacity-60 cursor-not-allowed"
+                    >
+                      <span className="text-sm font-medium text-stone-400 line-through">
+                        {slot.time}
+                      </span>
+                      <span className="block text-[10px] mt-0.5 text-red-400 font-medium">
+                        {slot.label || 'nicht verfügbar'}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="flex flex-wrap gap-4 mt-3 text-[10px] text-on-surface-variant">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-surface-container-low border border-stone-200" />
+                  <span>Verfügbar</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-primary-container" />
+                  <span>Ausgewählt</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-stone-100 opacity-60" />
+                  <span>Nicht verfügbar</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* No slots available at all */}
+          {!slotsLoading && !dayIsClosed && form.date && slots.length === 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-6 text-center">
+              <span className="material-symbols-outlined text-amber-400 text-3xl mb-2 block">event_busy</span>
+              <p className="text-amber-700 font-semibold text-sm">Keine Zeiten verfügbar</p>
+              <p className="text-amber-500 text-xs mt-1">Bitte wählen Sie ein anderes Datum.</p>
+            </div>
+          )}
         </div>
 
         {/* Special note */}
@@ -327,9 +408,9 @@ export default function BookingPage() {
         <button
           type="submit"
           onClick={handleSubmit}
-          disabled={submitting || !privacyAccepted}
+          disabled={submitting || !privacyAccepted || !form.time}
           className={`w-full py-4 font-bold rounded-xl text-base transition-all shadow-lg flex items-center justify-center gap-2 ${
-            privacyAccepted
+            privacyAccepted && form.time
               ? 'bg-primary-container text-white active:scale-95'
               : 'bg-stone-200 text-stone-400 cursor-not-allowed'
           }`}
