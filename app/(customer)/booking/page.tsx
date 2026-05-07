@@ -302,8 +302,8 @@ export default function BookingPage() {
           <span className="material-symbols-outlined text-on-secondary-container text-[18px] mt-0.5">info</span>
           <div className="text-xs text-on-secondary-container">
             <p className="font-semibold mb-0.5">Öffnungszeiten</p>
-            <p>Di–Do: 10:00–20:00 · Fr: 10:00–22:00</p>
-            <p>Sa: 11:00–22:00 · So: 11:00–19:00</p>
+            <p>Di: {settings['openDi'] || '12:00'}–{settings['closeDi'] || '21:00'} · Mi: {settings['openMi'] || '12:00'}–{settings['closeMi'] || '21:00'} · Do: {settings['openDo'] || '12:00'}–{settings['closeDo'] || '21:00'}</p>
+            <p>Fr: {settings['openFr'] || '12:00'}–{settings['closeFr'] || '22:00'} · Sa: {settings['openSa'] || '12:00'}–{settings['closeSa'] || '22:00'} · So: {settings['openSo'] || '12:00'}–{settings['closeSo'] || '20:00'}</p>
             <p className="text-error font-medium mt-0.5">Montag: Ruhetag</p>
           </div>
         </div>

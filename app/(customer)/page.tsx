@@ -295,7 +295,7 @@ export default function HomePage() {
                   >
                     <span className={`${isToday && !closed ? 'font-bold' : 'font-medium'}`}>
                       {item.day}
-                      {isToday && <span className="text-[9px] ml-1.5 text-primary-container font-bold uppercase">Heute</span>}
+                      {isToday && <>{' '}<span className="text-[9px] ml-0.5 text-primary-container font-bold uppercase">Heute</span></>}
                     </span>
                     <span className={closed ? 'font-bold' : 'text-on-surface-variant'}>
                       {hoursStr}
