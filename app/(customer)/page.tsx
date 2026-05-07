@@ -148,10 +148,9 @@ export default function HomePage() {
                 onChange={(e) => setGuests(e.target.value)}
                 className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface focus:ring-2 focus:ring-on-primary-container appearance-none"
               >
-                <option value="1">1 Gast</option>
-                <option value="2">2 Gäste</option>
-                <option value="4">4 Gäste</option>
-                <option value="6">6 Gäste</option>
+                {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={String(n)}>{n} {n === 1 ? 'Gast' : 'Gäste'}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -165,15 +164,24 @@ export default function HomePage() {
                 onChange={(e) => setTime(e.target.value)}
                 className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface focus:ring-2 focus:ring-on-primary-container appearance-none"
               >
-                <option value="08:00">08:00</option>
-                <option value="09:00">09:00</option>
-                <option value="10:00">10:00</option>
-                <option value="11:00">11:00</option>
-                <option value="12:00">12:00</option>
-                <option value="13:00">13:00</option>
-                <option value="14:00">14:00</option>
-                <option value="15:00">15:00</option>
-                <option value="16:00">16:00</option>
+                {(() => {
+                  // Generate time options from settings
+                  const openStr = site.openDi || site.openTuFr || '12:00'
+                  const closeStr = site.closeFr || site.closeTuFr || '22:00'
+                  const [oH, oM] = openStr.split(':').map(Number)
+                  const [cH, cM] = closeStr.split(':').map(Number)
+                  const startMin = oH * 60 + oM
+                  const endMin = cH * 60 + cM
+                  const options: string[] = []
+                  for (let cur = startMin; cur < endMin; cur += 30) {
+                    const h = Math.floor(cur / 60)
+                    const m = cur % 60
+                    options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
+                  }
+                  return options.map((t) => (
+                    <option key={t} value={t}>{t} Uhr</option>
+                  ))
+                })()}
               </select>
             </div>
           </div>
