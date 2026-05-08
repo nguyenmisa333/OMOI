@@ -98,8 +98,6 @@ const defaultSettings: CafeSettings = {
   amenityCreditCard: true,
 }
 
-let _blockedSlots: BlockedSlot[] = []
-
 export async function getSettings(): Promise<CafeSettings> {
   try {
     const { data } = await supabase
@@ -133,22 +131,57 @@ export async function updateSettings(partial: Partial<CafeSettings>): Promise<Ca
   return { ...next }
 }
 
-export function getBlockedSlots(): BlockedSlot[] { return [..._blockedSlots] }
+export async function getBlockedSlots(): Promise<BlockedSlot[]> {
+  try {
+    const { data, error } = await supabase
+      .from('blocked_times')
+      .select('*')
+      .order('createdAt', { ascending: false })
+    if (error) throw error
+    return (data || []).map(row => ({
+      id: row.id,
+      date: row.date,
+      dayOfWeek: row.dayOfWeek,
+      startTime: row.startTime,
+      endTime: row.endTime,
+      reason: row.reason || '',
+    }))
+  } catch (e) {
+    console.error('[Settings] getBlockedSlots error:', e)
+    return []
+  }
+}
 
-export function addBlockedSlot(slot: Omit<BlockedSlot, 'id'>): BlockedSlot {
+export async function addBlockedSlot(slot: Omit<BlockedSlot, 'id'>): Promise<BlockedSlot> {
   const newSlot: BlockedSlot = { ...slot, id: `blk-${Date.now()}` }
-  _blockedSlots.push(newSlot)
+  const { error } = await supabase.from('blocked_times').insert({
+    id: newSlot.id,
+    date: newSlot.date,
+    dayOfWeek: newSlot.dayOfWeek,
+    startTime: newSlot.startTime,
+    endTime: newSlot.endTime,
+    reason: newSlot.reason,
+  })
+  if (error) {
+    console.error('[Settings] addBlockedSlot error:', error)
+    throw error
+  }
   return newSlot
 }
 
-export function removeBlockedSlot(id: string): void {
-  _blockedSlots = _blockedSlots.filter(s => s.id !== id)
+export async function removeBlockedSlot(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('blocked_times')
+    .delete()
+    .eq('id', id)
+  if (error) console.error('[Settings] removeBlockedSlot error:', error)
 }
 
-export function isTimeBlocked(date: string, time: string): boolean {
+export async function isTimeBlocked(date: string, time: string): Promise<boolean> {
+  const slots = await getBlockedSlots()
   const dateObj = new Date(date)
   const dow = dateObj.getDay()
-  return _blockedSlots.some(slot => {
+  return slots.some(slot => {
     const matchesDate = slot.date === date || slot.date === '*'
     const matchesDow = slot.dayOfWeek !== null && slot.dayOfWeek === dow
     if (!matchesDate && !matchesDow) return false

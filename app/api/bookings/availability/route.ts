@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { getSettings } from '@/lib/settings'
+import { getSettings, getBlockedSlots } from '@/lib/settings'
 
 /**
  * GET /api/bookings/availability?date=YYYY-MM-DD&guestCount=N
@@ -57,10 +57,7 @@ export async function GET(request: NextRequest) {
     const endMin = closeH * 60 + closeM
 
     // Get blocked slots
-    const { data: blockedData } = await supabase
-      .from('blocked_times')
-      .select('*')
-    const blockedSlots = blockedData || []
+    const blockedSlots = await getBlockedSlots()
 
     // Get all active tables
     const { data: activeTables } = await supabase

@@ -4,7 +4,8 @@ import { requireStaff } from '@/lib/auth'
 
 // GET /api/blocked-times — public (booking page needs this)
 export async function GET() {
-  return NextResponse.json({ blockedSlots: getBlockedSlots() })
+  const blockedSlots = await getBlockedSlots()
+  return NextResponse.json({ blockedSlots })
 }
 
 // POST /api/blocked-times  — add a new block (OWNER only)
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'endTime must be after startTime' }, { status: 400 })
     }
 
-    const slot = addBlockedSlot({
+    const slot = await addBlockedSlot({
       date:      date || '*',
       dayOfWeek: dayOfWeek ?? null,
       startTime,
@@ -40,6 +41,6 @@ export async function DELETE(request: NextRequest) {
   const guard = await requireStaff('OWNER'); if (guard instanceof Response) return guard
   const id = new URL(request.url).searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
-  removeBlockedSlot(id)
+  await removeBlockedSlot(id)
   return NextResponse.json({ success: true })
 }
