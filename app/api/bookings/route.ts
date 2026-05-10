@@ -36,7 +36,33 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
     if (error) throw error
 
-    return NextResponse.json({ bookings: data || [] })
+    const bookings = data || []
+
+    // 1 batch DB query to get real historical visitCount for all customers at once
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const customerIds = [...new Set(bookings.map((b: any) => b.customerId).filter(Boolean))] as string[]
+    const visitCountMap = new Map<string, number>()
+    if (customerIds.length > 0) {
+      const { data: allVisits } = await supabase
+        .from('bookings')
+        .select('customerId')
+        .in('customerId', customerIds)
+        .not('status', 'in', '("CANCELLED","NO_SHOW")')
+      ;(allVisits || []).forEach((row: { customerId: string }) => {
+        visitCountMap.set(row.customerId, (visitCountMap.get(row.customerId) || 0) + 1)
+      })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enriched = bookings.map((b: any) => {
+      const count = b.customerId ? (visitCountMap.get(b.customerId) || 1) : 0
+      let _tier: 'NEUKUNDE' | 'STAMMKUNDE' | 'VIP' = 'NEUKUNDE'
+      if (count >= 10) _tier = 'VIP'
+      else if (count >= 3) _tier = 'STAMMKUNDE'
+      return { ...b, _visitCount: count, _tier: count > 0 ? _tier : undefined }
+    })
+
+    return NextResponse.json({ bookings: enriched })
   } catch (error) {
     console.error('GET /api/bookings error:', error)
     return NextResponse.json({ bookings: [], _mock: true })
