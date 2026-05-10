@@ -30,8 +30,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ slots: [], closed: true, reason: 'Montag: Ruhetag' })
     }
 
-    const settings = await getSettings()
-    const bookingDuration = settings.bookingDuration || 120 // minutes
+    // Run all independent DB fetches in parallel — no logic change, just faster
+    const [settings, blockedSlots, tablesResult, bookingsResult] = await Promise.all([
+      getSettings(),
+      getBlockedSlots(),
+      supabase.from('tables').select('id, capacity').eq('isActive', true),
+      supabase.from('bookings')
+        .select('startTime, endTime, guestCount, tableId, assignedTables:booking_tables(tableId)')
+        .eq('date', dateStr)
+        .in('status', ['PENDING', 'CONFIRMED', 'SEATED']),
+    ])
+
+    const bookingDuration = settings.bookingDuration || 120
     const slotDuration = settings.slotDuration || 30
 
     // Get opening hours for this day
@@ -56,24 +66,11 @@ export async function GET(request: NextRequest) {
     const startMin = openH * 60 + openM
     const endMin = closeH * 60 + closeM
 
-    // Get blocked slots
-    const blockedSlots = await getBlockedSlots()
+    const activeTables = tablesResult.data || []
+    const existingBookings = bookingsResult.data || []
 
-    // Get all active tables
-    const { data: activeTables } = await supabase
-      .from('tables')
-      .select('id, capacity')
-      .eq('isActive', true)
-
-    const totalCapacity = (activeTables || []).reduce((sum, t) => sum + (t.capacity as number), 0)
-    const suitableTables = (activeTables || []).filter(t => (t.capacity as number) >= guestCount)
-
-    // Get all bookings for this date
-    const { data: existingBookings } = await supabase
-      .from('bookings')
-      .select('startTime, endTime, guestCount, tableId, assignedTables:booking_tables(tableId)')
-      .eq('date', dateStr)
-      .in('status', ['PENDING', 'CONFIRMED', 'SEATED'])
+    const totalCapacity = activeTables.reduce((sum, t) => sum + (t.capacity as number), 0)
+    const suitableTables = activeTables.filter(t => (t.capacity as number) >= guestCount)
 
     // Check if today and get current time
     const now = new Date()
@@ -136,13 +133,15 @@ export async function GET(request: NextRequest) {
       slots.push({ time: t, status: 'available' })
     }
 
-    return NextResponse.json({
-      slots,
-      closed: false,
-      openTime,
-      closeTime,
-      totalCapacity,
-    })
+    return NextResponse.json(
+      { slots, closed: false, openTime, closeTime, totalCapacity },
+      {
+        headers: {
+          // Cache 30s on browser/CDN; serve stale up to 60s while revalidating
+          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+        },
+      }
+    )
   } catch (error) {
     console.error('GET /api/bookings/availability error:', error)
     return NextResponse.json({ slots: [], error: 'Failed to check availability' }, { status: 500 })

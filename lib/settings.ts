@@ -98,7 +98,16 @@ const defaultSettings: CafeSettings = {
   amenityCreditCard: true,
 }
 
+// In-memory cache for settings (30s TTL — safe since settings change rarely)
+let _settingsCache: CafeSettings | null = null
+let _settingsCacheAt = 0
+const SETTINGS_CACHE_TTL = 30_000 // 30 seconds
+
 export async function getSettings(): Promise<CafeSettings> {
+  // Return cached value if still fresh
+  if (_settingsCache && Date.now() - _settingsCacheAt < SETTINGS_CACHE_TTL) {
+    return { ..._settingsCache }
+  }
   try {
     const { data } = await supabase
       .from('app_settings')
@@ -107,9 +116,12 @@ export async function getSettings(): Promise<CafeSettings> {
       .single()
 
     if (!data || typeof data.value !== 'object' || data.value === null || Array.isArray(data.value)) {
-      return { ...defaultSettings }
+      _settingsCache = { ...defaultSettings }
+    } else {
+      _settingsCache = { ...defaultSettings, ...(data.value as Partial<CafeSettings>) }
     }
-    return { ...defaultSettings, ...(data.value as Partial<CafeSettings>) }
+    _settingsCacheAt = Date.now()
+    return { ..._settingsCache }
   } catch {
     return { ...defaultSettings }
   }
@@ -127,6 +139,10 @@ export async function updateSettings(partial: Partial<CafeSettings>): Promise<Ca
   } else {
     await supabase.from('app_settings').insert({ key: SETTINGS_KEY, value: next })
   }
+
+  // Invalidate cache so next read gets fresh data
+  _settingsCache = next
+  _settingsCacheAt = Date.now()
 
   return { ...next }
 }
