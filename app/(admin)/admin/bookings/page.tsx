@@ -156,19 +156,14 @@ export default function AdminBookingsPage() {
       const data = await res.json()
       const rawBookings: Booking[] = data.bookings || []
 
-      // Enrich with visit counts — batch by customerId
-      const customerIds = [...new Set(rawBookings.filter(b => b.customerId).map(b => b.customerId as string))]
+      // Calculate visitCount directly from loaded data — no extra API calls needed
+      // Count confirmed bookings per customer from current dataset
       const visitCounts = new Map<string, number>()
-      if (customerIds.length > 0) {
-        // Count bookings per customer in one pass from current data
-        for (const cid of customerIds) {
-          try {
-            const cRes = await fetch(`/api/customers/${rawBookings.find(b => b.customerId === cid)?.guestPhone || ''}`)
-            const cData = await cRes.json()
-            if (cData.found) visitCounts.set(cid, cData.customer.visitCount)
-          } catch { /* ignore */ }
-        }
-      }
+      rawBookings.forEach(b => {
+        if (!b.customerId) return
+        if (['CANCELLED', 'NO_SHOW'].includes(b.status)) return
+        visitCounts.set(b.customerId, (visitCounts.get(b.customerId) || 0) + 1)
+      })
 
       const enriched = rawBookings.map(b => {
         const count = b.customerId ? (visitCounts.get(b.customerId) || 1) : 0
