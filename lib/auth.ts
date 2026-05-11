@@ -15,10 +15,10 @@ const SECRET = new TextEncoder().encode(
   process.env.NEXTAUTH_SECRET!
 )
 
-export async function createToken(session: Session): Promise<string> {
+export async function createToken(session: Session, expiresIn: string = '30d'): Promise<string> {
   return new SignJWT({ ...session })
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('8h')
+    .setExpirationTime(expiresIn)
     .setIssuedAt()
     .sign(SECRET)
 }

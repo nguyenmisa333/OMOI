@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       name: staff.name,
       email: staff.email,
       role: staff.role as StaffRole,
-    })
+    }, '30d') // 30 days
 
     const res = NextResponse.json({
       ok: true,
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 8, // 8h
+      maxAge: 60 * 60 * 24 * 30, // 30 ngày
       path: '/',
     })
 
