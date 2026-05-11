@@ -96,7 +96,7 @@ export default function AdminBookingsPage() {
   const [bookings, setBookings]         = useState<Booking[]>([])
   const [tables, setTables]             = useState<Table[]>([])
   const [loading, setLoading]           = useState(true)
-  const [dateFilter, setDateFilter]     = useState('')
+  const [dateFilter, setDateFilter]     = useState(toDateInputValue(new Date()))
   const [statusFilter, setStatusFilter] = useState('')
   const [selected, setSelected]         = useState<Booking | null>(null)
   const [assignMode, setAssignMode]     = useState(false)
