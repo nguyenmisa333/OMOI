@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OMOI • 思い — Tischreservierung",
-  description: "Online-Tischreservierung für OMOI Cafe — Hauptstätter Str. 57, 70178 Stuttgart. Entdecken Sie den raffinierten Raum und die ursprünglichen Matcha-Aromen.",
-  keywords: "OMOI, Cafe, Tischreservierung, Reservation, Stuttgart, Matcha",
+  title: "O·MO·I | Brunch · Matcha · Onigirazu — Stuttgart",
+  description: "O·MO·I — Japanisch inspiriertes Brunch-Café in Stuttgart. Ceremonial Matcha, handgefertigte Onigirazu und Artisan Brunch. Jetzt Tisch reservieren.",
+  keywords: "OMOI, Cafe, Matcha, Onigirazu, Brunch, Stuttgart, Reservierung",
+  metadataBase: new URL("https://omoi.help"),
   openGraph: {
-    title: "OMOI • 思い — Café & Roastery",
-    description: "Einfach reservieren — Vollständig genießen",
+    title: "O·MO·I | Brunch · Matcha · Onigirazu — Stuttgart",
+    description: "Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Ceremonial Matcha & Signature Onigirazu.",
     locale: "de_DE",
+    siteName: "O·MO·I",
   },
 };
 

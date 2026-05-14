@@ -62,11 +62,11 @@ export default function UeberUnsPage() {
 
         <div className="mt-10 p-5 bg-white rounded-2xl border border-[#e8dcc8] space-y-2 text-sm text-stone-500">
           <p><strong className="text-[#3b1f0a]">Adresse:</strong> Hauptstätter Str. 57, 70178 Stuttgart-Mitte</p>
-          <p><strong className="text-[#3b1f0a]">Di–Do:</strong> 10:00 – 20:00 · <strong className="text-[#3b1f0a]">Fr:</strong> 10:00 – 22:00</p>
-          <p><strong className="text-[#3b1f0a]">Sa:</strong> 11:00 – 22:00 · <strong className="text-[#3b1f0a]">So:</strong> 11:00 – 19:00</p>
-          <p className="text-xs text-stone-400">Montag: Ruhetag · An Feiertagen wie sonntags 11–19 Uhr</p>
+          <p><strong className="text-[#3b1f0a]">Di–Do:</strong> 12:00 – 21:00 · <strong className="text-[#3b1f0a]">Fr–Sa:</strong> 12:00 – 22:00</p>
+          <p><strong className="text-[#3b1f0a]">So:</strong> 12:00 – 20:00</p>
+          <p className="text-xs text-stone-400">Montag: Ruhetag · An Feiertagen wie sonntags 12–20 Uhr</p>
           <p><strong className="text-[#3b1f0a]">E-Mail:</strong> hello@o-mo-i.de</p>
-          <p><strong className="text-[#3b1f0a]">Instagram:</strong> @omoi.stuttgart</p>
+          <p><strong className="text-[#3b1f0a]">Instagram:</strong> @o.mo.i</p>
         </div>
       </div>
     </div>

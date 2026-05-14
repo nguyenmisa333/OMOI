@@ -3,368 +3,380 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
+// ─── Menu Data ────────────────────────────────────────
+const MENU_DATA = [
+  {
+    id: "coffee", label: "Coffee",
+    items: [
+      { name: "Espresso", price: "2,20" },
+      { name: "Espresso Macchiato", price: "2,90" },
+      { name: "Cappuccino", price: "3,90" },
+      { name: "Iced Latte", price: "3,90" },
+      { name: "Flat White", price: "3,90" },
+      { name: "Americano", price: "3,30" },
+      { name: "Heiße Schokolade", price: "4,50" },
+      { name: "Latte Macchiato", price: "4,90" },
+    ],
+    note: "Standard: Kuhmilch | Alternative: Hafermilch, Kokosmilch"
+  },
+  {
+    id: "matcha", label: "Iced Matcha & Hojicha Ceremonial",
+    items: [
+      { name: "Velvet Matcha + Tiramisu", price: "9,00" },
+      { name: "Matcha Classic HOT", price: "4,50" },
+      { name: "Hojicha HOT", price: "5,20" },
+      { name: "Matcha Classic", price: "4,50" },
+      { name: "Strawberry Matcha", price: "5,50" },
+      { name: "Mango Matcha", price: "5,50" },
+      { name: "Misu Matcha Cloud", price: "7,00" },
+      { name: "Yuzu Matcha Cloud", price: "7,00" },
+    ],
+    note: "Standard: Kuhmilch & Agaven-Sirup | Alternative: Hafermilch, Kokosmilch"
+  },
+  {
+    id: "onigirazu", label: "O·MO·I Signature Onigirazu",
+    items: [
+      { name: "Hot Red Tuna", desc: "gekochter Thunfisch, Spicy-Mayo", price: "8,50" },
+      { name: "Okinawa Classic", desc: "Frühstücksfleisch, Spicy-Mayo", price: "5,50" },
+      { name: "Teriyaki Grilled Dry-Aged Salmon", desc: "Lachs-Steak, Togarashi", price: "9,50" },
+      { name: "Kani-Kama", desc: "Surimi Mix, Mentaiko-Mayo", price: "6,50" },
+      { name: "Slow Grill Chicken", desc: "Hühnerbrustfilet, Teriyaki-Soße", price: "7,50" },
+      { name: "Super Mario", desc: "Buchenpilze, Kräuterseitlinge, Miso-Butter", price: "7,00" },
+    ],
+    note: "Base 7,0 € — Nori, Sushireis, Salat, Lachstatar, Tamago-Ei, Avocado"
+  },
+  {
+    id: "bowls", label: "O·MO·I Bowls",
+    items: [
+      { name: "Salmon Rubies", desc: "Lachs, Kirschtomaten, Spicy-Mayo", price: "11,90" },
+      { name: "Midori Otah Veggie 🌱", desc: "Buchenpilze, Shoyu Glaze", price: "10,90" },
+      { name: "Fired Tuna", desc: "Sous-Vide-Thunfisch, Goldfire", price: "13,90" },
+      { name: "Crispy O·MO·I", desc: "gegrilltes Hähnchen, Teriyaki", price: "12,90" },
+      { name: "Beef Embers", desc: "Entrecôte, Pepper-Sauce", price: "15,90" },
+      { name: "Tofu Aoi 🌱", desc: "knuspriger Tofu, Shoyu Glaze", price: "10,90" },
+    ],
+    note: "Sushireis, Salat, Avocado, Gurke, Kim Chi, Nori, Edamame"
+  },
+  {
+    id: "desserts", label: "Signature Desserts",
+    items: [
+      { name: "Matcha Tiramisu", price: "6,50" },
+    ],
+    note: "Kuchen wechseln täglich — schaut an der Vitrine!"
+  },
+]
+
+const TAB_GROUPS = [
+  { label: "Coffee", cats: ["coffee"] },
+  { label: "Matcha", cats: ["matcha"] },
+  { label: "Onigirazu", cats: ["onigirazu"] },
+  { label: "Bowls", cats: ["bowls"] },
+  { label: "Desserts", cats: ["desserts"] },
+]
+
+// ─── Opening hours helper ─────────────────────────────
 interface SiteSettings {
-  openTuFr: string; closeTuFr: string
-  openSaSo: string; closeSaSo: string
   openDi: string; closeDi: string
   openMi: string; closeMi: string
   openDo: string; closeDo: string
   openFr: string; closeFr: string
   openSa: string; closeSa: string
   openSo: string; closeSo: string
-  restaurantName: string; restaurantAddress: string
-  restaurantPhone: string; restaurantEmail: string
-  restaurantWebsite: string; restaurantGoogleMaps: string
-  restaurantInstagram: string; restaurantFacebook: string
-  amenityOutdoor: boolean; amenityWifi: boolean
-  amenityKidFriendly: boolean; amenityBarrierfree: boolean
-  amenityParking: boolean; amenityReservation: boolean
-  amenityTakeaway: boolean; amenityCreditCard: boolean
 }
 
-const defaultSite: SiteSettings = {
-  openTuFr: '12:00', closeTuFr: '21:00', openSaSo: '12:00', closeSaSo: '22:00',
-  openDi: '12:00', closeDi: '21:00', openMi: '12:00', closeMi: '21:00',
-  openDo: '12:00', closeDo: '21:00', openFr: '12:00', closeFr: '22:00',
-  openSa: '12:00', closeSa: '22:00', openSo: '12:00', closeSo: '20:00',
-  restaurantName: 'OMOI · 思い', restaurantAddress: 'Hauptstätter Str. 57, 70178 Stuttgart',
-  restaurantPhone: '', restaurantEmail: '', restaurantWebsite: '',
-  restaurantGoogleMaps: 'https://maps.app.goo.gl/Vy3wRgdSbauSvcxT9',
-  restaurantInstagram: '', restaurantFacebook: '',
-  amenityOutdoor: false, amenityWifi: true, amenityKidFriendly: false,
-  amenityBarrierfree: false, amenityParking: false, amenityReservation: true,
-  amenityTakeaway: false, amenityCreditCard: true,
+const defaultHours: SiteSettings = {
+  openDi: '12:00', closeDi: '21:00',
+  openMi: '12:00', closeMi: '21:00',
+  openDo: '12:00', closeDo: '21:00',
+  openFr: '12:00', closeFr: '22:00',
+  openSa: '12:00', closeSa: '22:00',
+  openSo: '12:00', closeSo: '20:00',
 }
 
-// Helper: get open/close for a day-of-week
-function getDayHours(s: SiteSettings, dow: number): { open: string; close: string } | null {
-  if (dow === 1) return null // Monday Ruhetag
-  const map: Record<number, [string, string, string, string]> = {
-    2: [s.openDi, s.closeDi, s.openTuFr, s.closeTuFr],
-    3: [s.openMi, s.closeMi, s.openTuFr, s.closeTuFr],
-    4: [s.openDo, s.closeDo, s.openTuFr, s.closeTuFr],
-    5: [s.openFr, s.closeFr, s.openTuFr, s.closeTuFr],
-    6: [s.openSa, s.closeSa, s.openSaSo, s.closeSaSo],
-    0: [s.openSo, s.closeSo, s.openSaSo, s.closeSaSo],
+function getDayHours(s: SiteSettings, dow: number) {
+  if (dow === 1) return null
+  const map: Record<number, [string, string]> = {
+    2: [s.openDi, s.closeDi], 3: [s.openMi, s.closeMi],
+    4: [s.openDo, s.closeDo], 5: [s.openFr, s.closeFr],
+    6: [s.openSa, s.closeSa], 0: [s.openSo, s.closeSo],
   }
   const d = map[dow]
-  if (!d) return null
-  return { open: d[0] || d[2] || '12:00', close: d[1] || d[3] || '21:00' }
+  return d ? { open: d[0], close: d[1] } : null
 }
 
+// ─── Component ────────────────────────────────────────
 export default function HomePage() {
-  const [date, setDate] = useState('')
-  const [guests, setGuests] = useState('2')
-  const [time, setTime] = useState('12:00')
-  const [today, setToday] = useState('')
-  const [site, setSite] = useState<SiteSettings>(defaultSite)
+  const [activeTab, setActiveTab] = useState(0)
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null)
+  const [site, setSite] = useState<SiteSettings>(defaultHours)
   const [mounted, setMounted] = useState(false)
   const [currentDow, setCurrentDow] = useState(-1)
 
+  // Quick booking state
+  const [date, setDate] = useState('')
+  const [guests, setGuests] = useState('2')
+  const [today, setToday] = useState('')
+
   useEffect(() => {
     setMounted(true)
-    setToday(new Date().toISOString().split('T')[0])
-    setCurrentDow(new Date().getDay())
+    const now = new Date()
+    setToday(now.toISOString().split('T')[0])
+    setCurrentDow(now.getDay())
+    // Default to tomorrow (skip Monday)
+    const tmr = new Date(now)
+    tmr.setDate(tmr.getDate() + 1)
+    if (tmr.getDay() === 1) tmr.setDate(tmr.getDate() + 1)
+    setDate(tmr.toISOString().split('T')[0])
+
     fetch('/api/settings').then(r => r.json()).then(d => {
       if (d.settings) setSite(prev => ({ ...prev, ...d.settings }))
     }).catch(() => {})
   }, [])
 
-  // Determine if currently open — only meaningful after mount
-  function getOpenStatus(): { isOpen: boolean; label: string; todayHours: string } {
-    if (!mounted) return { isOpen: false, label: '...', todayHours: '...' }
+  function getStatus() {
+    if (!mounted) return { isOpen: false, label: '...', hours: '...' }
     const now = new Date()
-    const dow = now.getDay()
-    const hours = getDayHours(site, dow)
-    if (!hours) return { isOpen: false, label: 'Ruhetag', todayHours: 'Montag: Ruhetag' }
-
-    const nowStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-    const isOpen = nowStr >= hours.open && nowStr < hours.close
-
+    const h = getDayHours(site, now.getDay())
+    if (!h) return { isOpen: false, label: 'Ruhetag', hours: 'Montag: Ruhetag' }
+    const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    const isOpen = t >= h.open && t < h.close
     return {
       isOpen,
-      label: isOpen ? `Geöffnet bis ${hours.close}` : `Öffnet um ${hours.open}`,
-      todayHours: `${hours.open} – ${hours.close} Uhr`,
+      label: isOpen ? `Geöffnet bis ${h.close}` : `Öffnet um ${h.open}`,
+      hours: `${h.open} – ${h.close} Uhr`
     }
   }
-
-  const status = getOpenStatus()
-
-  const amenities = [
-    { key: 'amenityOutdoor', icon: 'deck', label: 'Außenbereich' },
-    { key: 'amenityWifi', icon: 'wifi', label: 'WLAN' },
-    { key: 'amenityKidFriendly', icon: 'child_care', label: 'Kinderfreundlich' },
-    { key: 'amenityBarrierfree', icon: 'accessible', label: 'Barrierefrei' },
-    { key: 'amenityParking', icon: 'local_parking', label: 'Parkplatz' },
-    { key: 'amenityReservation', icon: 'event_seat', label: 'Reservierung' },
-    { key: 'amenityTakeaway', icon: 'takeout_dining', label: 'Takeaway' },
-    { key: 'amenityCreditCard', icon: 'credit_card', label: 'Kartenzahlung' },
-  ].filter(a => site[a.key as keyof SiteSettings] as boolean)
+  const status = getStatus()
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative h-[85vh] w-full overflow-hidden -mt-16">
-        <img
-          alt="OMOI Cafe Innenraum"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ objectPosition: 'center 40%' }}
-          src="/images/hero-cafe.jpg"
-        />
-        <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-center px-6">
-          <img src="/images/omoi-logo.png" alt="OMOI" className="h-12 md:h-16 object-contain mb-8 invert brightness-200" />
-          <h2 className="text-white text-4xl md:text-6xl font-bold mb-6 max-w-3xl leading-tight">
-            Einfach reservieren — Vollständig genießen
-          </h2>
-          <p className="text-white/90 text-lg md:text-xl max-w-xl">
-            Entdecken Sie den raffinierten Raum und die ursprünglichen Matcha-Aromen mitten in der Stadt.
+    <div className="-mt-16">
+      {/* ═══ HERO ═══════════════════════════════════════ */}
+      <section className="relative h-[100vh] w-full overflow-hidden">
+        <img src="/images/hero-website.jpg" alt="O·MO·I Café" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+          <img src="/images/omoi-logo.png" alt="O·MO·I" className="h-14 md:h-20 object-contain mb-6 invert brightness-200 drop-shadow-lg" />
+          <p className="text-white/90 text-sm md:text-base uppercase tracking-[0.3em] font-medium mb-2">
+            Brunch · Matcha · Onigirazu
           </p>
-        </div>
-      </section>
-
-      {/* Schnellbuchung */}
-      <div className="relative z-20 -mt-16 px-4 md:px-6 max-w-5xl mx-auto">
-        <div className="bg-surface-container-lowest p-6 md:p-8 rounded-[2rem] shadow-xl border border-outline-variant flex flex-col md:flex-row gap-6 items-end">
-          <div className="w-full space-y-2">
-            <label className="text-sm font-semibold text-on-surface-variant block ml-1 uppercase tracking-wider">Datum</label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-primary-container">calendar_today</span>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                min={today}
-                className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface focus:ring-2 focus:ring-on-primary-container"
-              />
-            </div>
-          </div>
-
-          <div className="w-full space-y-2">
-            <label className="text-sm font-semibold text-on-surface-variant block ml-1 uppercase tracking-wider">Gäste</label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-primary-container">group</span>
-              <select
-                value={guests}
-                onChange={(e) => setGuests(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface focus:ring-2 focus:ring-on-primary-container appearance-none"
-              >
-                {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
-                  <option key={n} value={String(n)}>{n} {n === 1 ? 'Gast' : 'Gäste'}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="w-full space-y-2">
-            <label className="text-sm font-semibold text-on-surface-variant block ml-1 uppercase tracking-wider">Uhrzeit</label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-primary-container">schedule</span>
-              <select
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-xl text-on-surface focus:ring-2 focus:ring-on-primary-container appearance-none"
-              >
-                {(() => {
-                  // Generate time options from settings
-                  const openStr = site.openDi || site.openTuFr || '12:00'
-                  const closeStr = site.closeFr || site.closeTuFr || '22:00'
-                  const [oH, oM] = openStr.split(':').map(Number)
-                  const [cH, cM] = closeStr.split(':').map(Number)
-                  const startMin = oH * 60 + oM
-                  const endMin = cH * 60 + cM
-                  const options: string[] = []
-                  for (let cur = startMin; cur < endMin; cur += 30) {
-                    const h = Math.floor(cur / 60)
-                    const m = cur % 60
-                    options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
-                  }
-                  return options.map((t) => (
-                    <option key={t} value={t}>{t} Uhr</option>
-                  ))
-                })()}
-              </select>
-            </div>
-          </div>
-
-          <Link
-            href="/booking"
-            className="w-full md:w-auto px-10 py-4 bg-primary-container text-white font-bold rounded-xl hover:bg-primary transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg"
-          >
-            <span>Tisch finden</span>
-            <span className="material-symbols-outlined">search</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* ── Details Section ──────────────────────── */}
-      <section className="py-16 px-4 md:px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Left — Info */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="text-2xl font-bold text-on-surface">Details</h2>
-
-            {/* Open status */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-on-surface-variant">schedule</span>
-                <span className="font-semibold text-on-surface">{status.label}</span>
-              </div>
-              <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
-                status.isOpen
-                  ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                  : 'bg-red-100 text-red-600 border-red-200'
-              }`}>
-                {status.isOpen ? 'Geöffnet' : 'Geschlossen'}
-              </span>
-            </div>
-
-            {/* Today hours */}
-            <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-              <span className="material-symbols-outlined text-base">calendar_today</span>
-              <span>Heute: {status.todayHours}</span>
-            </div>
-
-            {/* Amenities grid */}
-            {amenities.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                {amenities.map(a => (
-                  <div key={a.key} className="flex items-center gap-2.5 px-4 py-3 bg-surface-container-low rounded-xl">
-                    <span className="material-symbols-outlined text-primary-container text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>{a.icon}</span>
-                    <span className="text-sm font-medium text-on-surface">{a.label}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Contact info */}
-            <div className="space-y-3 pt-2">
-              {site.restaurantPhone && (
-                <a href={`tel:${site.restaurantPhone}`} className="flex items-center gap-3 text-sm text-on-surface hover:text-primary-container transition-colors">
-                  <span className="material-symbols-outlined text-on-surface-variant text-lg">call</span>
-                  <span className="font-medium">{site.restaurantPhone}</span>
-                </a>
-              )}
-              {site.restaurantEmail && (
-                <a href={`mailto:${site.restaurantEmail}`} className="flex items-center gap-3 text-sm text-on-surface hover:text-primary-container transition-colors">
-                  <span className="material-symbols-outlined text-on-surface-variant text-lg">mail</span>
-                  <span className="font-medium">{site.restaurantEmail}</span>
-                </a>
-              )}
-              {site.restaurantWebsite && (
-                <a href={site.restaurantWebsite} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-primary-container hover:underline transition-colors">
-                  <span className="material-symbols-outlined text-on-surface-variant text-lg">language</span>
-                  <span className="font-medium">{site.restaurantWebsite}</span>
-                </a>
-              )}
-              {site.restaurantInstagram && (
-                <a href={`https://instagram.com/${site.restaurantInstagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-primary-container hover:underline transition-colors">
-                  <span className="text-on-surface-variant text-lg font-bold w-6 text-center">@</span>
-                  <span className="font-medium">Instagram: @{site.restaurantInstagram}</span>
-                </a>
-              )}
-              {site.restaurantFacebook && (
-                <a href={site.restaurantFacebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-primary-container hover:underline transition-colors">
-                  <span className="material-symbols-outlined text-on-surface-variant text-lg">thumb_up</span>
-                  <span className="font-medium">Facebook</span>
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Right — Öffnungszeiten card */}
-          <div className="bg-surface-container rounded-2xl p-6 h-fit">
-            <h3 className="font-bold text-on-surface mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-lg">schedule</span>
-              Öffnungszeiten
-            </h3>
-            <div className="space-y-2">
-              {[
-                { day: 'Montag', dow: 1 },
-                { day: 'Dienstag', dow: 2 },
-                { day: 'Mittwoch', dow: 3 },
-                { day: 'Donnerstag', dow: 4 },
-                { day: 'Freitag', dow: 5 },
-                { day: 'Samstag', dow: 6 },
-                { day: 'Sonntag', dow: 0 },
-              ].map((item) => {
-                const isToday = mounted && currentDow === item.dow
-                const hours = getDayHours(site, item.dow)
-                const closed = !hours
-                const hoursStr = closed ? 'Ruhetag' : `${hours.open} – ${hours.close}`
-                return (
-                  <div
-                    key={item.day}
-                    className={`flex justify-between items-center px-4 py-2.5 rounded-xl text-sm ${
-                      closed ? 'bg-red-50 text-red-500'
-                        : isToday ? 'bg-primary-container/10 text-on-surface font-semibold ring-1 ring-primary-container/30'
-                        : 'bg-surface-container-low'
-                    }`}
-                  >
-                    <span className={`${isToday && !closed ? 'font-bold' : 'font-medium'}`}>
-                      {item.day}
-                      {isToday && <>{' '}<span className="text-[9px] ml-0.5 text-primary-container font-bold uppercase">Heute</span></>}
-                    </span>
-                    <span className={closed ? 'font-bold' : 'text-on-surface-variant'}>
-                      {hoursStr}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Standort */}
-      <section className="w-full">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 mb-8">
-          <h2 className="text-3xl font-bold text-on-surface">So finden Sie uns</h2>
-          <p className="text-on-surface-variant mt-2">
-            {site.restaurantAddress}
+          <p className="text-white/60 text-sm md:text-lg max-w-md italic">
+            Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich.
           </p>
-        </div>
-        <div className="w-full h-[400px] bg-stone-200 relative overflow-hidden">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2629.2!2d9.1744!3d48.7669!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDjCsDQ2JzAxLjAiTiA5wrAxMCczNC4wIkU!5e0!3m2!1sde!2sde!4v1600000000000!5m2!1sde!2sde"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="OMOI Standort"
-          />
-          {site.restaurantGoogleMaps && (
-            <a
-              href={site.restaurantGoogleMaps}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            >
-              <div className="bg-primary-container text-white p-4 rounded-2xl shadow-2xl animate-bounce">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  location_on
-                </span>
-              </div>
+          <div className="flex gap-3 mt-8">
+            <Link href="/booking" className="px-8 py-3.5 bg-[#C4975C] text-white font-bold rounded-xl hover:bg-[#b3864d] transition-all active:scale-95 shadow-lg text-sm">
+              Tisch reservieren
+            </Link>
+            <a href="#menu" className="px-8 py-3.5 border-2 border-white/40 text-white font-bold rounded-xl hover:bg-white/10 transition-all active:scale-95 text-sm">
+              Speisekarte
             </a>
-          )}
+          </div>
+          {/* Open status */}
+          <div className="mt-6 flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${status.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+            <span className="text-white/70 text-xs font-medium">{status.label}</span>
+          </div>
+        </div>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce">
+          <span className="material-symbols-outlined text-white/50 text-3xl">keyboard_arrow_down</span>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="w-full bg-stone-100 border-t border-stone-200 mb-20 md:mb-0">
-        <div className="flex flex-col items-center py-12 px-6 gap-6 w-full">
-          <img src="/images/omoi-logo.png" alt="OMOI" className="h-8 object-contain opacity-70" />
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
-            <a className="text-stone-500 text-sm hover:underline decoration-amber-500 underline-offset-4" href="/ueber-uns">Über uns</a>
-            <a className="text-stone-500 text-sm hover:underline decoration-amber-500 underline-offset-4" href="/datenschutz">Datenschutz</a>
-            <a className="text-stone-500 text-sm hover:underline decoration-amber-500 underline-offset-4" href="/kontakt">Kontakt</a>
-            <a className="text-stone-500 text-sm hover:underline decoration-amber-500 underline-offset-4" href="/impressum">Impressum</a>
-          </div>
-          <p className="text-sm text-stone-900 mt-4">© 2025 OMOI • 思い. Feinste Kaffeekultur.</p>
+      {/* ═══ ABOUT ══════════════════════════════════════ */}
+      <section className="py-16 md:py-24 px-4 md:px-6 max-w-6xl mx-auto" id="about">
+        <div className="text-center mb-12">
+          <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Über uns</p>
+          <h2 className="text-2xl md:text-4xl font-bold text-[#3b1f0a] mb-4">Willkommen bei O·MO·I</h2>
+          <div className="w-8 h-0.5 bg-[#C4975C] mx-auto mb-6 rounded-full" />
+          <p className="text-stone-500 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
+            O·MO·I bedeutet Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Wir servieren handverlesenen Ceremonial Grade Matcha, kunstvoll zubereitete Signature Onigirazu und Bowls – Crafted with Heart, mitten in Stuttgart.
+          </p>
         </div>
-      </footer>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { img: '/images/about-matcha.jpg', title: 'Ceremonial Matcha', desc: 'Traditionell zubereitet aus den feinsten Teeblättern Japans.' },
+            { img: '/images/about-onigirazu.jpg', title: 'Signature Onigirazu', desc: 'Unser handgefertigtes Sushi-Sandwich, neu interpretiert.' },
+            { img: '/images/about-brunch.jpg', title: 'Artisan Brunch', desc: 'Matcha Tiramisu, Onigirazu & Bowl – alles auf einem Tisch.' },
+          ].map((card) => (
+            <div key={card.title} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+              <div className="h-52 overflow-hidden">
+                <img src={card.img} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-5">
+                <h3 className="font-bold text-[#3b1f0a] text-lg mb-1">{card.title}</h3>
+                <p className="text-stone-400 text-sm">{card.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ MENU ═══════════════════════════════════════ */}
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-[#faf6f0]" id="menu">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Speisekarte</p>
+            <h2 className="text-2xl md:text-4xl font-bold text-[#3b1f0a] mb-3">Unsere Speisekarte</h2>
+            <p className="text-stone-400 text-sm">Von Matcha bis Onigirazu — mit Liebe zubereitet</p>
+          </div>
+
+          {/* Desktop Tabs */}
+          <div className="hidden md:block">
+            <div className="flex justify-center gap-2 mb-8 flex-wrap">
+              {TAB_GROUPS.map((g, i) => (
+                <button key={g.label} onClick={() => setActiveTab(i)}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    activeTab === i ? 'bg-[#3b1f0a] text-white shadow-lg' : 'bg-white text-stone-500 hover:bg-stone-100'
+                  }`}>{g.label}</button>
+              ))}
+            </div>
+            {TAB_GROUPS.map((group, gi) => (
+              <div key={group.label} className={gi === activeTab ? 'block' : 'hidden'}>
+                {group.cats.map(catId => {
+                  const cat = MENU_DATA.find(c => c.id === catId)
+                  if (!cat) return null
+                  return (
+                    <div key={cat.id} className="mb-8">
+                      <h3 className="text-lg font-bold text-[#3b1f0a] mb-1">{cat.label}</h3>
+                      {cat.note && <p className="text-xs text-[#C4975C] italic mb-4">{cat.note}</p>}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+                        {cat.items.map(item => (
+                          <div key={item.name} className="flex justify-between items-baseline py-2 border-b border-stone-200/60">
+                            <div>
+                              <span className="text-sm font-medium text-[#3b1f0a]">{item.name}</span>
+                              {'desc' in item && item.desc && <span className="text-xs text-stone-400 ml-2">{item.desc}</span>}
+                            </div>
+                            <span className="text-sm font-bold text-[#C4975C] ml-4 whitespace-nowrap">{item.price} €</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Accordion */}
+          <div className="md:hidden space-y-2">
+            {MENU_DATA.map(cat => (
+              <div key={cat.id} className="bg-white rounded-xl overflow-hidden shadow-sm">
+                <button onClick={() => setOpenAccordion(openAccordion === cat.id ? null : cat.id)}
+                  className="w-full flex justify-between items-center px-4 py-3.5 text-left">
+                  <span className="font-semibold text-sm text-[#3b1f0a]">{cat.label}</span>
+                  <span className={`material-symbols-outlined text-stone-400 text-lg transition-transform ${openAccordion === cat.id ? 'rotate-180' : ''}`}>expand_more</span>
+                </button>
+                {openAccordion === cat.id && (
+                  <div className="px-4 pb-4 space-y-1">
+                    {cat.note && <p className="text-[11px] text-[#C4975C] italic mb-2">{cat.note}</p>}
+                    {cat.items.map(item => (
+                      <div key={item.name} className="flex justify-between items-baseline py-1.5">
+                        <div>
+                          <span className="text-sm text-[#3b1f0a]">{item.name}</span>
+                          {'desc' in item && item.desc && <span className="text-[11px] text-stone-400 block">{item.desc}</span>}
+                        </div>
+                        <span className="text-sm font-bold text-[#C4975C] ml-3">{item.price} €</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ QUICK BOOKING ══════════════════════════════ */}
+      <section className="py-16 md:py-24 px-4 md:px-6" id="reservieren">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Reservierung</p>
+          <h2 className="text-2xl md:text-4xl font-bold text-[#3b1f0a] mb-3">Reservieren Sie Ihren Tisch</h2>
+          <p className="text-stone-400 text-sm mb-10">Sichern Sie sich Ihren Platz in unserer Zen-Oase.</p>
+
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-100 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="text-left">
+                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1.5">Datum</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#C4975C] text-lg">calendar_today</span>
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} min={today}
+                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border-none rounded-xl text-sm text-[#3b1f0a] focus:ring-2 focus:ring-[#C4975C]" />
+                </div>
+              </div>
+              <div className="text-left">
+                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1.5">Gäste</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#C4975C] text-lg">group</span>
+                  <select value={guests} onChange={e => setGuests(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border-none rounded-xl text-sm text-[#3b1f0a] focus:ring-2 focus:ring-[#C4975C] appearance-none">
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+                      <option key={n} value={n}>{n} {n === 1 ? 'Gast' : 'Gäste'}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <Link href={`/booking?date=${date}&guests=${guests}`}
+              className="w-full py-4 bg-[#3b1f0a] text-white font-bold rounded-xl hover:bg-[#2a1507] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg text-sm">
+              <span className="material-symbols-outlined text-lg">event_seat</span>
+              Jetzt Tisch finden
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ ÖFFNUNGSZEITEN + KONTAKT ═══════════════════ */}
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-[#3b1f0a]" id="kontakt">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {/* Öffnungszeiten */}
+            <div>
+              <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-4">Öffnungszeiten</p>
+              <div className="space-y-2">
+                {[
+                  { day: 'Montag', dow: 1 }, { day: 'Dienstag', dow: 2 },
+                  { day: 'Mittwoch', dow: 3 }, { day: 'Donnerstag', dow: 4 },
+                  { day: 'Freitag', dow: 5 }, { day: 'Samstag', dow: 6 },
+                  { day: 'Sonntag', dow: 0 },
+                ].map(item => {
+                  const h = getDayHours(site, item.dow)
+                  const isToday = mounted && currentDow === item.dow
+                  return (
+                    <div key={item.day} className={`flex justify-between text-sm py-1 ${isToday ? 'text-[#C4975C] font-bold' : 'text-white/70'}`}>
+                      <span>{item.day}{isToday ? ' ·' : ''}</span>
+                      <span>{h ? `${h.open} – ${h.close}` : 'Ruhetag'}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+            {/* Info */}
+            <div>
+              <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-4">O·MO·I</p>
+              <p className="text-white/50 text-sm italic mb-4">&quot;Gefühl, Gedanke, Sehnsucht und Liebe&quot;</p>
+              <a href="https://instagram.com/o.mo.i" target="_blank" rel="noopener noreferrer"
+                className="text-[#C4975C] text-sm font-semibold hover:underline">@o.mo.i</a>
+            </div>
+            {/* Kontakt */}
+            <div>
+              <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-4">Kontakt</p>
+              <p className="text-white/70 text-sm">Hauptstätter Straße 57</p>
+              <p className="text-white/70 text-sm">70178 Stuttgart-Mitte</p>
+              <a href="mailto:hello@o-mo-i.de" className="text-[#C4975C] text-sm font-semibold hover:underline mt-2 inline-block">
+                hello@o-mo-i.de
+              </a>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-white/30 text-xs">© 2026 O·MO·I — Crafted with Heart in Stuttgart</p>
+            <nav className="flex gap-6">
+              <Link href="/impressum" className="text-white/30 text-xs hover:text-[#C4975C] transition-colors font-medium">Impressum</Link>
+              <Link href="/datenschutz" className="text-white/30 text-xs hover:text-[#C4975C] transition-colors font-medium">Datenschutz</Link>
+            </nav>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

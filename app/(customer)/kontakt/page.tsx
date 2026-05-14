@@ -3,12 +3,12 @@ import Link from 'next/link'
 export const metadata = { title: 'Kontakt – OMOI Café' }
 
 const HOURS = [
-  { day: 'Dienstag',   time: '10 — 20 Uhr' },
-  { day: 'Mittwoch',   time: '10 — 20 Uhr' },
-  { day: 'Donnerstag', time: '10 — 20 Uhr' },
-  { day: 'Freitag',    time: '10 — 22 Uhr' },
-  { day: 'Samstag',    time: '11 — 22 Uhr' },
-  { day: 'Sonntag',    time: '11 — 19 Uhr' },
+  { day: 'Dienstag',   time: '12:00 — 21:00 Uhr' },
+  { day: 'Mittwoch',   time: '12:00 — 21:00 Uhr' },
+  { day: 'Donnerstag', time: '12:00 — 21:00 Uhr' },
+  { day: 'Freitag',    time: '12:00 — 22:00 Uhr' },
+  { day: 'Samstag',    time: '12:00 — 22:00 Uhr' },
+  { day: 'Sonntag',    time: '12:00 — 20:00 Uhr' },
 ]
 
 export default function KontaktPage() {
@@ -34,8 +34,7 @@ export default function KontaktPage() {
           </div>
           <div className="mt-5 pt-4 border-t border-stone-100 space-y-1 text-center">
             <p className="text-xs font-bold tracking-widest text-stone-400 uppercase">Montag · Ruhetag</p>
-            <p className="text-xs text-stone-400 italic">An Feiertagen wie sonntags · 11 — 19 Uhr</p>
-            <p className="text-xs text-stone-400 mt-2">gültig ab Freitag · 1. Mai</p>
+            <p className="text-xs text-stone-400 italic">An Feiertagen wie sonntags · 12:00 — 20:00 Uhr</p>
           </div>
         </div>
 
@@ -45,7 +44,7 @@ export default function KontaktPage() {
             { icon: '📍', label: 'Adresse', value: 'Hauptstätter Str. 57\n70178 Stuttgart-Mitte' },
             { icon: '✉️', label: 'E-Mail', value: 'hello@o-mo-i.de' },
             { icon: '🌐', label: 'Website', value: 'o-mo-i.de' },
-            { icon: '📱', label: 'Instagram', value: '@omoi.stuttgart' },
+            { icon: '📱', label: 'Instagram', value: '@o.mo.i' },
             { icon: '🛜', label: 'WLAN', value: 'OMOI guest · Passwort: omoi2026' },
           ].map(item => (
             <div key={item.label} className="flex gap-4 p-4 bg-white rounded-2xl border border-[#e8dcc8]">
