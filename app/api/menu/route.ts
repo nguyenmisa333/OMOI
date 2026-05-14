@@ -1,34 +1,46 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-// GET /api/menu — list all available menu items (public)
+// GET /api/menu — Public endpoint, returns full menu for homepage
 export async function GET() {
   try {
-    const { data: items, error } = await supabase
+    const { data: categories, error: catErr } = await supabase
+      .from('menu_categories')
+      .select('id, slug, label, note, sortOrder, active')
+      .eq('active', true)
+      .order('sortOrder')
+
+    if (catErr) throw catErr
+
+    const { data: items, error: itemErr } = await supabase
       .from('menu_items')
-      .select('*')
-      .eq('isAvailable', true)
-      .order('category', { ascending: true })
-      .order('name', { ascending: true })
+      .select('id, categoryId, name, description, price, allergens, tags, sortOrder, active')
+      .eq('active', true)
+      .order('sortOrder')
 
-    if (error) throw error
+    if (itemErr) throw itemErr
 
-    // Group by category
-    const grouped: Record<string, typeof items> = {}
-    for (const item of (items || [])) {
-      if (!grouped[item.category]) grouped[item.category] = []
-      grouped[item.category].push(item)
-    }
+    // Group items by category
+    const menu = (categories || []).map(cat => ({
+      id: cat.slug,
+      label: cat.label,
+      note: cat.note,
+      items: (items || [])
+        .filter(i => i.categoryId === cat.id)
+        .map(i => ({
+          name: i.name,
+          desc: i.description || undefined,
+          price: i.price,
+          allergens: i.allergens || undefined,
+        })),
+    }))
 
-    return NextResponse.json({ items: items || [], grouped })
+    return NextResponse.json({ menu }, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
+    })
   } catch (error) {
     console.error('GET /api/menu error:', error)
-    const { mockMenu } = await import('@/lib/mock-data')
-    const grouped: Record<string, typeof mockMenu> = {}
-    for (const item of mockMenu) {
-      if (!grouped[item.category]) grouped[item.category] = []
-      grouped[item.category].push(item)
-    }
-    return NextResponse.json({ items: mockMenu, grouped, _mock: true })
+    // Fallback to hardcoded menu if DB tables don't exist yet
+    return NextResponse.json({ menu: null, _fallback: true })
   }
 }

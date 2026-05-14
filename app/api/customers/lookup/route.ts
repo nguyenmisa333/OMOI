@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { requireStaff } from '@/lib/auth'
 
 // GET /api/customers/lookup?phone=xxx or ?email=xxx
+// Public endpoint — used by customer Verlauf (history) page
 export async function GET(request: NextRequest) {
-  const guard = await requireStaff(); if (guard instanceof Response) return guard
   try {
     const { searchParams } = new URL(request.url)
     const phone = searchParams.get('phone')

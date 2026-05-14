@@ -1,8 +1,38 @@
-import Link from 'next/link'
+'use client'
 
-export const metadata = { title: 'Über uns – OMOI Café' }
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
+
+type SiteSettings = Record<string, string>
+const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+function getDayHours(s: SiteSettings, dow: number) {
+  const prefix = DAY_KEYS[dow]
+  const open = s[`${prefix}_open`]
+  const close = s[`${prefix}_close`]
+  return open && close ? { open, close } : null
+}
+const defaultHours: SiteSettings = {
+  tue_open: '12:00', tue_close: '21:00',
+  wed_open: '12:00', wed_close: '21:00',
+  thu_open: '12:00', thu_close: '21:00',
+  fri_open: '12:00', fri_close: '22:00',
+  sat_open: '12:00', sat_close: '22:00',
+  sun_open: '12:00', sun_close: '20:00',
+}
 
 export default function UeberUnsPage() {
+  const [site, setSite] = useState<SiteSettings>(defaultHours)
+
+  useEffect(() => {
+    fetch('/api/settings').then(r => r.json()).then(d => {
+      if (d.settings) setSite(prev => ({ ...prev, ...d.settings }))
+    }).catch(() => {})
+  }, [])
+
+  const diDo = getDayHours(site, 2)
+  const frSa = getDayHours(site, 5)
+  const so = getDayHours(site, 0)
+
   return (
     <div className="min-h-screen bg-[#fdfbf7]">
       <div className="max-w-2xl mx-auto px-6 py-16">
@@ -62,9 +92,9 @@ export default function UeberUnsPage() {
 
         <div className="mt-10 p-5 bg-white rounded-2xl border border-[#e8dcc8] space-y-2 text-sm text-stone-500">
           <p><strong className="text-[#3b1f0a]">Adresse:</strong> Hauptstätter Str. 57, 70178 Stuttgart-Mitte</p>
-          <p><strong className="text-[#3b1f0a]">Di–Do:</strong> 12:00 – 21:00 · <strong className="text-[#3b1f0a]">Fr–Sa:</strong> 12:00 – 22:00</p>
-          <p><strong className="text-[#3b1f0a]">So:</strong> 12:00 – 20:00</p>
-          <p className="text-xs text-stone-400">Montag: Ruhetag · An Feiertagen wie sonntags 12–20 Uhr</p>
+          <p><strong className="text-[#3b1f0a]">Di–Do:</strong> {diDo ? `${diDo.open} – ${diDo.close}` : '...'} · <strong className="text-[#3b1f0a]">Fr–Sa:</strong> {frSa ? `${frSa.open} – ${frSa.close}` : '...'}</p>
+          <p><strong className="text-[#3b1f0a]">So:</strong> {so ? `${so.open} – ${so.close}` : '...'}</p>
+          <p className="text-xs text-stone-400">Montag: Ruhetag · An Feiertagen wie sonntags</p>
           <p><strong className="text-[#3b1f0a]">E-Mail:</strong> hello@o-mo-i.de</p>
           <p><strong className="text-[#3b1f0a]">Instagram:</strong> @o.mo.i</p>
         </div>

@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
-// ─── Menu Data ────────────────────────────────────────
-const MENU_DATA = [
+// ─── Fallback Menu Data ────────────────────────────────────────
+const MENU_DATA_FALLBACK = [
   {
     id: "coffee", label: "Coffee",
     items: [
@@ -60,9 +61,76 @@ const MENU_DATA = [
   {
     id: "desserts", label: "Signature Desserts",
     items: [
-      { name: "Matcha Tiramisu", price: "6,50" },
+      { name: "Matcha Tiramisu", price: "6,50", desc: "a, c, g" },
     ],
     note: "Kuchen wechseln täglich — schaut an der Vitrine!"
+  },
+]
+
+// ─── Kuchen Zutaten/Allergene ─────────────────────────
+const ALLERGEN_LEGEND: Record<string, string> = {
+  'a': 'Gluten (Weizen)',
+  'c': 'Eier',
+  'g': 'Milch / Laktose',
+  'n': 'Sesam',
+}
+
+interface KuchenItem {
+  name: string
+  zutaten: string
+  allergene: string[]
+  tags?: string[]
+}
+
+const KUCHEN_BASIS: KuchenItem[] = [
+  {
+    name: 'Tiramisu Kaffee',
+    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Kaffee & Kakao',
+    allergene: ['a', 'c', 'g'],
+  },
+  {
+    name: 'Tiramisu Matcha',
+    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Matcha',
+    allergene: ['a', 'c', 'g'],
+  },
+  {
+    name: 'Frucht Tiramisu',
+    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Fruchtpüree, Gelatine',
+    allergene: ['a', 'c', 'g'],
+  },
+  {
+    name: 'Mille Crepes Basis',
+    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Rapsöl, Gelatine',
+    allergene: ['a', 'c', 'g'],
+  },
+]
+
+const KUCHEN_SPECIALS: KuchenItem[] = [
+  {
+    name: 'Matcha Sesam Blaubeer Mille Crepes',
+    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Matcha, Sesam, Blaubeeren, Gelatine',
+    allergene: ['a', 'c', 'g', 'n'],
+  },
+  {
+    name: 'Earl Grey Blaubeer Chiffon',
+    zutaten: 'Sahne, Ei, Zucker, Mehl, Earl Grey Tee, Blaubeeren',
+    allergene: ['a', 'c', 'g'],
+  },
+  {
+    name: 'Bananen Miso Mille Crepes',
+    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Banane, Miso, Gelatine',
+    allergene: ['a', 'c', 'g'],
+  },
+  {
+    name: 'Matcha Mango Passionsfrucht Chiffon',
+    zutaten: 'Sahne, Ei, Zucker, Mehl, Matcha, Mango, Passionsfrucht',
+    allergene: ['a', 'c', 'g'],
+  },
+  {
+    name: 'Ube Coconut Erdbeer Gateaux',
+    zutaten: 'Kokosmilch, Reismehl, Zucker, Ube, Erdbeeren, Kokosöl',
+    allergene: [],
+    tags: ['glutenfrei', 'laktosefrei'],
   },
 ]
 
@@ -116,13 +184,15 @@ export default function HomePage() {
   const [date, setDate] = useState('')
   const [guests, setGuests] = useState('2')
   const [today, setToday] = useState('')
+  const [menuData, setMenuData] = useState(MENU_DATA_FALLBACK)
 
+  // Scroll reveal observer
+  const revealRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     setMounted(true)
     const now = new Date()
     setToday(now.toISOString().split('T')[0])
     setCurrentDow(now.getDay())
-    // Default to tomorrow (skip Monday)
     const tmr = new Date(now)
     tmr.setDate(tmr.getDate() + 1)
     if (tmr.getDay() === 1) tmr.setDate(tmr.getDate() + 1)
@@ -131,6 +201,19 @@ export default function HomePage() {
     fetch('/api/settings').then(r => r.json()).then(d => {
       if (d.settings) setSite(prev => ({ ...prev, ...d.settings }))
     }).catch(() => {})
+
+    // Fetch dynamic menu from API (fallback to hardcoded)
+    fetch('/api/menu').then(r => r.json()).then(d => {
+      if (d.menu && d.menu.length > 0) setMenuData(d.menu)
+    }).catch(() => {})
+
+    // Intersection Observer for scroll reveals
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } }),
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    )
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el))
+    return () => observer.disconnect()
   }, [])
 
   function getStatus() {
@@ -148,45 +231,62 @@ export default function HomePage() {
   }
   const status = getStatus()
 
+  // #11 Loading skeleton
+  if (!mounted) {
+    return (
+      <div className="-mt-16">
+        <div className="relative h-[100vh] w-full bg-[#3b1f0a] flex flex-col items-center justify-center">
+          <div className="w-40 h-20 rounded-2xl bg-white/10 animate-pulse mb-6" />
+          <div className="w-48 h-4 rounded-full bg-white/10 animate-pulse mb-3" />
+          <div className="w-64 h-3 rounded-full bg-white/8 animate-pulse mb-8" />
+          <div className="flex gap-3">
+            <div className="w-36 h-12 rounded-xl bg-[#C4975C]/30 animate-pulse" />
+            <div className="w-32 h-12 rounded-xl bg-white/10 animate-pulse" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="-mt-16">
+    <div className="-mt-16" ref={revealRef}>
       {/* ═══ HERO ═══════════════════════════════════════ */}
       <section className="relative h-[100vh] w-full overflow-hidden">
-        <img src="/images/hero-website.jpg" alt="O·MO·I Café" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60" />
+        <Image src="/images/hero-website.jpg" alt="O·MO·I Café" fill priority className="object-cover animate-hero-zoom" sizes="100vw" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/70" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <img src="/images/omoi-logo.png" alt="O·MO·I" className="h-14 md:h-20 object-contain mb-6 invert brightness-200 drop-shadow-lg" />
-          <p className="text-white/90 text-sm md:text-base uppercase tracking-[0.3em] font-medium mb-2">
+          <Image src="/images/omoi-logo.png" alt="O·MO·I" width={320} height={160} className="h-28 md:h-40 w-auto object-contain mb-6 animate-logo-float" priority />
+          <p className="text-white/90 text-sm md:text-base uppercase tracking-[0.3em] font-medium mb-2 animate-fade-up-d2">
             Brunch · Matcha · Onigirazu
           </p>
-          <p className="text-white/60 text-sm md:text-lg max-w-md italic">
+          <p className="text-white/60 text-sm md:text-lg max-w-md italic animate-fade-up-d3">
             Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich.
           </p>
-          <div className="flex gap-3 mt-8">
-            <Link href="/booking" className="px-8 py-3.5 bg-[#C4975C] text-white font-bold rounded-xl hover:bg-[#b3864d] transition-all active:scale-95 shadow-lg text-sm">
+          <div className="flex gap-3 mt-8 animate-fade-up-d4">
+            <Link href="/booking" className="btn-shine px-8 py-3.5 bg-[#C4975C] text-white font-bold rounded-xl hover:bg-[#b3864d] transition-all active:scale-95 shadow-lg text-sm hover:shadow-[0_8px_30px_rgba(196,151,92,0.4)]">
               Tisch reservieren
             </Link>
-            <a href="#menu" className="px-8 py-3.5 border-2 border-white/40 text-white font-bold rounded-xl hover:bg-white/10 transition-all active:scale-95 text-sm">
+            <a href="#menu" className="px-8 py-3.5 border-2 border-white/40 text-white font-bold rounded-xl hover:bg-white/10 hover:border-white/60 transition-all active:scale-95 text-sm">
               Speisekarte
             </a>
           </div>
           {/* Open status */}
-          <div className="mt-6 flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${status.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+          <div className="mt-6 flex items-center gap-2 animate-fade-up-d5">
+            <span className={`w-2.5 h-2.5 rounded-full ${status.isOpen ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.6)]'}`} />
             <span className="text-white/70 text-xs font-medium">{status.label}</span>
           </div>
         </div>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce">
-          <span className="material-symbols-outlined text-white/50 text-3xl">keyboard_arrow_down</span>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <span className="material-symbols-outlined text-white/40 text-4xl">keyboard_arrow_down</span>
         </div>
       </section>
 
       {/* ═══ ABOUT ══════════════════════════════════════ */}
       <section className="py-16 md:py-24 px-4 md:px-6 max-w-6xl mx-auto" id="about">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 scroll-reveal">
           <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Über uns</p>
-          <h2 className="text-2xl md:text-4xl font-bold text-[#3b1f0a] mb-4">Willkommen bei O·MO·I</h2>
-          <div className="w-8 h-0.5 bg-[#C4975C] mx-auto mb-6 rounded-full" />
+          <h2 className="text-2xl md:text-4xl font-bold text-shimmer-gold mb-4">Willkommen bei O·MO·I</h2>
+          <div className="w-8 h-0.5 bg-[#C4975C] mx-auto mb-6 rounded-full animate-line-expand" />
           <p className="text-stone-500 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
             O·MO·I bedeutet Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Wir servieren handverlesenen Ceremonial Grade Matcha, kunstvoll zubereitete Signature Onigirazu und Bowls – Crafted with Heart, mitten in Stuttgart.
           </p>
@@ -196,10 +296,10 @@ export default function HomePage() {
             { img: '/images/about-matcha.jpg', title: 'Ceremonial Matcha', desc: 'Traditionell zubereitet aus den feinsten Teeblättern Japans.' },
             { img: '/images/about-onigirazu.jpg', title: 'Signature Onigirazu', desc: 'Unser handgefertigtes Sushi-Sandwich, neu interpretiert.' },
             { img: '/images/about-brunch.jpg', title: 'Artisan Brunch', desc: 'Matcha Tiramisu, Onigirazu & Bowl – alles auf einem Tisch.' },
-          ].map((card) => (
-            <div key={card.title} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-              <div className="h-52 overflow-hidden">
-                <img src={card.img} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          ].map((card, i) => (
+            <div key={card.title} className={`scroll-reveal group card-hover bg-white rounded-2xl overflow-hidden shadow-sm`} style={{ transitionDelay: `${i * 150}ms` }}>
+              <div className="h-52 overflow-hidden relative">
+                <Image src={card.img} alt={card.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="(max-width: 768px) 100vw, 33vw" />
               </div>
               <div className="p-5">
                 <h3 className="font-bold text-[#3b1f0a] text-lg mb-1">{card.title}</h3>
@@ -232,7 +332,7 @@ export default function HomePage() {
             {TAB_GROUPS.map((group, gi) => (
               <div key={group.label} className={gi === activeTab ? 'block' : 'hidden'}>
                 {group.cats.map(catId => {
-                  const cat = MENU_DATA.find(c => c.id === catId)
+                  const cat = menuData.find(c => c.id === catId)
                   if (!cat) return null
                   return (
                     <div key={cat.id} className="mb-8">
@@ -249,6 +349,54 @@ export default function HomePage() {
                           </div>
                         ))}
                       </div>
+                      {/* Kuchen Allergene inline in Desserts */}
+                      {catId === 'desserts' && (
+                        <div className="mt-8 space-y-6">
+                          <div>
+                            <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-3">Basis · Immer verfügbar</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {KUCHEN_BASIS.map(k => (
+                                <div key={k.name} className="bg-stone-50 rounded-xl p-3.5 border border-stone-100">
+                                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                                    <span className="font-bold text-[#3b1f0a] text-sm">{k.name}</span>
+                                    <div className="flex gap-1 shrink-0">
+                                      {k.allergene.map(c => <span key={c} className="w-5 h-5 rounded-full bg-[#3b1f0a] text-white text-[9px] font-bold flex items-center justify-center uppercase">{c}</span>)}
+                                    </div>
+                                  </div>
+                                  <p className="text-[11px] text-stone-400">{k.zutaten}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-3">Specials · Wechselnd</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {KUCHEN_SPECIALS.map(k => (
+                                <div key={k.name} className="bg-stone-50 rounded-xl p-3.5 border border-stone-100">
+                                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-bold text-[#3b1f0a] text-sm">{k.name}</span>
+                                      {k.tags?.map(t => <span key={t} className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full uppercase">{t}</span>)}
+                                    </div>
+                                    <div className="flex gap-1 shrink-0">
+                                      {k.allergene.length > 0 ? k.allergene.map(c => <span key={c} className="w-5 h-5 rounded-full bg-[#C4975C] text-white text-[9px] font-bold flex items-center justify-center uppercase">{c}</span>) : <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">✓</span>}
+                                    </div>
+                                  </div>
+                                  <p className="text-[11px] text-stone-400">{k.zutaten}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-2">
+                            {Object.entries(ALLERGEN_LEGEND).map(([code, label]) => (
+                              <div key={code} className="flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-[#3b1f0a] text-white text-[8px] font-bold flex items-center justify-center uppercase">{code}</span>
+                                <span className="text-[11px] text-stone-400">{label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -258,7 +406,7 @@ export default function HomePage() {
 
           {/* Mobile Accordion */}
           <div className="md:hidden space-y-2">
-            {MENU_DATA.map(cat => (
+            {menuData.map(cat => (
               <div key={cat.id} className="bg-white rounded-xl overflow-hidden shadow-sm">
                 <button onClick={() => setOpenAccordion(openAccordion === cat.id ? null : cat.id)}
                   className="w-full flex justify-between items-center px-4 py-3.5 text-left">
@@ -277,6 +425,34 @@ export default function HomePage() {
                         <span className="text-sm font-bold text-[#C4975C] ml-3">{item.price} €</span>
                       </div>
                     ))}
+                    {/* Kuchen Allergene inline in mobile Desserts */}
+                    {cat.id === 'desserts' && (
+                      <div className="mt-4 space-y-4">
+                        <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[2px] pt-2">Zutaten & Allergene</p>
+                        {[...KUCHEN_BASIS, ...KUCHEN_SPECIALS].map(k => (
+                          <div key={k.name} className="bg-stone-50 rounded-lg p-3 border border-stone-100">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-[#3b1f0a] text-[13px]">{k.name}</span>
+                                {k.tags?.map(t => <span key={t} className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full uppercase">{t}</span>)}
+                              </div>
+                              <div className="flex gap-0.5 shrink-0">
+                                {k.allergene.length > 0 ? k.allergene.map(c => <span key={c} className="w-5 h-5 rounded-full bg-[#3b1f0a] text-white text-[9px] font-bold flex items-center justify-center uppercase">{c}</span>) : <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">✓</span>}
+                              </div>
+                            </div>
+                            <p className="text-[11px] text-stone-400">{k.zutaten}</p>
+                          </div>
+                        ))}
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
+                          {Object.entries(ALLERGEN_LEGEND).map(([code, label]) => (
+                            <div key={code} className="flex items-center gap-1">
+                              <span className="w-4 h-4 rounded-full bg-[#3b1f0a] text-white text-[8px] font-bold flex items-center justify-center uppercase">{code}</span>
+                              <span className="text-[10px] text-stone-400">{label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -284,22 +460,21 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* ═══ QUICK BOOKING ══════════════════════════════ */}
       <section className="py-16 md:py-24 px-4 md:px-6" id="reservieren">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center scroll-reveal">
           <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Reservierung</p>
-          <h2 className="text-2xl md:text-4xl font-bold text-[#3b1f0a] mb-3">Reservieren Sie Ihren Tisch</h2>
+          <h2 className="text-2xl md:text-4xl font-bold text-shimmer-gold mb-3">Reservieren Sie Ihren Tisch</h2>
           <p className="text-stone-400 text-sm mb-10">Sichern Sie sich Ihren Platz in unserer Zen-Oase.</p>
 
-          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-100 max-w-2xl mx-auto">
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-100 max-w-2xl mx-auto animate-glow-pulse">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="text-left">
                 <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1.5">Datum</label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#C4975C] text-lg">calendar_today</span>
                   <input type="date" value={date} onChange={e => setDate(e.target.value)} min={today}
-                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border-none rounded-xl text-sm text-[#3b1f0a] focus:ring-2 focus:ring-[#C4975C]" />
+                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border-none rounded-xl text-sm text-[#3b1f0a] focus:ring-2 focus:ring-[#C4975C] transition-all" />
                 </div>
               </div>
               <div className="text-left">
@@ -307,7 +482,7 @@ export default function HomePage() {
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#C4975C] text-lg">group</span>
                   <select value={guests} onChange={e => setGuests(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border-none rounded-xl text-sm text-[#3b1f0a] focus:ring-2 focus:ring-[#C4975C] appearance-none">
+                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border-none rounded-xl text-sm text-[#3b1f0a] focus:ring-2 focus:ring-[#C4975C] appearance-none transition-all">
                     {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
                       <option key={n} value={n}>{n} {n === 1 ? 'Gast' : 'Gäste'}</option>
                     ))}
@@ -316,7 +491,7 @@ export default function HomePage() {
               </div>
             </div>
             <Link href={`/booking?date=${date}&guests=${guests}`}
-              className="w-full py-4 bg-[#3b1f0a] text-white font-bold rounded-xl hover:bg-[#2a1507] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg text-sm">
+              className="btn-shine w-full py-4 bg-[#3b1f0a] text-white font-bold rounded-xl hover:bg-[#2a1507] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg text-sm hover:shadow-[0_8px_30px_rgba(59,31,10,0.3)]">
               <span className="material-symbols-outlined text-lg">event_seat</span>
               Jetzt Tisch finden
             </Link>
@@ -325,7 +500,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ ÖFFNUNGSZEITEN + KONTAKT ═══════════════════ */}
-      <section className="py-16 md:py-24 px-4 md:px-6 bg-[#3b1f0a]" id="kontakt">
+      <section className="py-16 md:py-24 pb-28 px-4 md:px-6 bg-[#3b1f0a]" id="kontakt">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Öffnungszeiten */}

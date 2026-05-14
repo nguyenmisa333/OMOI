@@ -1,7 +1,8 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import BottomNav from '@/components/shared/BottomNav'
 
@@ -15,22 +16,55 @@ const navLinks = [
   { href: '/datenschutz', icon: 'shield', label: 'Datenschutz' },
 ]
 
+// Sections on homepage for scroll-spy
+const homeSections = ['about', 'menu', 'reservieren', 'kontakt']
+
 export default function CustomerLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const isHome = pathname === '/'
   const isConfirmPage = pathname?.startsWith('/booking/confirm')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [activeSection, setActiveSection] = useState('')
+
+  // Scroll-spy + header transparency
+  useEffect(() => {
+    if (!isHome) return
+    const onScroll = () => setScrolled(window.scrollY > 80)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActiveSection(e.target.id)
+        }
+      },
+      { threshold: 0.3, rootMargin: '-80px 0px -40% 0px' }
+    )
+    homeSections.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+    return () => { window.removeEventListener('scroll', onScroll); observer.disconnect() }
+  }, [isHome])
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
       {/* Top AppBar */}
       {!isConfirmPage && (
-        <header className="fixed top-0 w-full z-50 bg-stone-50/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+          isHome && !scrolled
+            ? 'bg-transparent border-transparent'
+            : 'bg-stone-50/80 backdrop-blur-md border-b border-stone-200 shadow-sm'
+        }`}>
           <div className="flex items-center justify-between px-4 h-16 w-full max-w-7xl mx-auto">
             {isHome ? (
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="material-symbols-outlined text-stone-900 hover:bg-stone-100 transition-colors p-2 rounded-full active:scale-95 duration-200 md:hidden"
+                className={`material-symbols-outlined hover:bg-stone-100/20 transition-colors p-2 rounded-full active:scale-95 duration-200 md:hidden ${
+                  isHome && !scrolled ? 'text-white' : 'text-stone-900'
+                }`}
               >
                 {menuOpen ? 'close' : 'menu'}
               </button>
@@ -43,9 +77,9 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
               </Link>
             )}
             <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
-              <img src="/images/omoi-avatar.png" alt="OMOI" className="w-8 h-8 rounded-full" />
+              <Image src="/images/omoi-avatar.png" alt="OMOI" width={32} height={32} className="rounded-full" />
               {isHome && (
-                <img src="/images/omoi-logo.png" alt="OMOI" className="h-6 object-contain" />
+                <Image src="/images/omoi-logo.png" alt="OMOI" width={96} height={24} className={`h-6 w-auto object-contain transition-all ${!scrolled ? 'invert brightness-200' : ''}`} />
               )}
               {!isHome && pathname?.includes('/booking') && (
                 <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">RESERVIERUNG</span>
@@ -65,22 +99,27 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                 <span className="material-symbols-outlined">person</span>
               </div>
             </div>
-            {/* Desktop nav */}
+            {/* Desktop nav with scroll-spy */}
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.slice(0, 5).map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    (item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href))
-                      ? 'bg-amber-100 text-amber-900'
-                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
+              {navLinks.slice(0, 5).map((item) => {
+                const isPageActive = item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href)
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      isPageActive
+                        ? 'bg-amber-100 text-amber-900'
+                        : isHome && !scrolled
+                          ? 'text-white/80 hover:text-white hover:bg-white/10'
+                          : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                )
+              })}
             </nav>
           </div>
         </header>
