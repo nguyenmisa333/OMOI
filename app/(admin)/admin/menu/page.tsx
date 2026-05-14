@@ -7,19 +7,19 @@ interface Category {
   slug: string
   label: string
   note: string | null
-  sortOrder: number
+  sort_order: number
   active: boolean
 }
 
 interface MenuItem {
   id: string
-  categoryId: string
+  category_id: string
   name: string
   description: string | null
   price: string
   allergens: string | null
   tags: string[]
-  sortOrder: number
+  sort_order: number
   active: boolean
 }
 
@@ -148,7 +148,7 @@ export default function AdminMenuPage() {
       {/* Categories */}
       <div className="space-y-6">
         {categories.map(cat => {
-          const catItems = items.filter(i => i.categoryId === cat.id)
+          const catItems = items.filter(i => i.category_id === cat.id)
           return (
             <div key={cat.id} className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
               {/* Category Header */}

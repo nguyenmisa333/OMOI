@@ -9,12 +9,12 @@ export async function GET() {
   const { data: categories } = await supabase
     .from('menu_categories')
     .select('*')
-    .order('sortOrder')
+    .order('sort_order')
 
   const { data: items } = await supabase
     .from('menu_items')
     .select('*')
-    .order('sortOrder')
+    .order('sort_order')
 
   return NextResponse.json({ categories: categories || [], items: items || [] })
 }
@@ -26,18 +26,17 @@ export async function POST(req: NextRequest) {
 
   if (body.type === 'category') {
     const { slug, label, note } = body
-    // Get next sort order
     const { data: last } = await supabase
       .from('menu_categories')
-      .select('sortOrder')
-      .order('sortOrder', { ascending: false })
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
       .limit(1)
       .single()
-    const nextSort = (last?.sortOrder || 0) + 1
+    const nextSort = (last?.sort_order || 0) + 1
 
     const { data, error } = await supabase
       .from('menu_categories')
-      .insert({ slug, label, note, sortOrder: nextSort })
+      .insert({ slug, label, note, sort_order: nextSort })
       .select()
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
@@ -48,16 +47,16 @@ export async function POST(req: NextRequest) {
     const { categoryId, name, description, price, allergens, tags } = body
     const { data: last } = await supabase
       .from('menu_items')
-      .select('sortOrder')
-      .eq('categoryId', categoryId)
-      .order('sortOrder', { ascending: false })
+      .select('sort_order')
+      .eq('category_id', categoryId)
+      .order('sort_order', { ascending: false })
       .limit(1)
       .single()
-    const nextSort = (last?.sortOrder || 0) + 1
+    const nextSort = (last?.sort_order || 0) + 1
 
     const { data, error } = await supabase
       .from('menu_items')
-      .insert({ categoryId, name, description, price, allergens, tags, sortOrder: nextSort })
+      .insert({ category_id: categoryId, name, description, price, allergens, tags, sort_order: nextSort })
       .select()
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
