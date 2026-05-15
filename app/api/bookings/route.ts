@@ -23,8 +23,7 @@ export async function GET(request: NextRequest) {
         *,
         table:tables(*),
         customer:customers(id, name, phone, preferredZone, createdAt),
-        assignedTables:booking_tables(*, table:tables(*)),
-        preOrders:pre_orders(*, menuItem:menu_items(*))
+        assignedTables:booking_tables(*, table:tables(*))
       `)
       .order('date', { ascending: true })
       .order('startTime', { ascending: true })
