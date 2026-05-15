@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import jsQR from 'jsqr'
 import Link from 'next/link'
 
 type BarcodeDetectorLike = {
@@ -22,7 +23,7 @@ interface Booking {
   specialNote: string | null
   table: { id: string; number: number; zone: string; name: string } | null
   assignedTables?: Array<{ table: { id: string; number: number; zone: string; name: string } }>
-  preOrders: Array<{ quantity: number; menuItem: { name: string; price: number } }>
+  preOrders?: Array<{ quantity: number; menuItem: { name: string; price: number } }>
 }
 
 const statusLabels: Record<string, string> = {
@@ -153,16 +154,10 @@ export default function AdminScanPage() {
     setError('')
     setMessage('')
 
-    const Detector = getBarcodeDetector()
-    if (!Detector) {
-      setError('QR-Scan wird von diesem Browser nicht unterstützt. Bitte Code manuell eingeben.')
-      return
-    }
-
     try {
       stopScanner()
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 640 }, height: { ideal: 480 } },
         audio: false,
       })
       streamRef.current = stream
@@ -175,25 +170,39 @@ export default function AdminScanPage() {
       video.srcObject = stream
       await video.play()
 
-      const detector = new Detector({ formats: ['qr_code'] })
+      const Detector = getBarcodeDetector()
+      const useNative = !!Detector
+      const detector = useNative ? new Detector!({ formats: ['qr_code'] }) : null
+
+      // Canvas for jsQR fallback
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!
 
       const scanFrame = async () => {
         if (!scanActiveRef.current || !videoRef.current) return
 
         try {
           if (videoRef.current.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-            const codes = await detector.detect(videoRef.current)
-            const rawValue = codes[0]?.rawValue
-            if (rawValue) {
-              await lookupBooking(rawValue)
-              return
+            if (useNative && detector) {
+              // Native BarcodeDetector (Chrome, Android)
+              const codes = await detector.detect(videoRef.current)
+              const rawValue = codes[0]?.rawValue
+              if (rawValue) { await lookupBooking(rawValue); return }
+            } else {
+              // jsQR fallback (iOS Safari, Firefox)
+              canvas.width = videoRef.current.videoWidth
+              canvas.height = videoRef.current.videoHeight
+              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+              const qr = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' })
+              if (qr?.data) { await lookupBooking(qr.data); return }
             }
           }
         } catch {
-          setError('QR-Code konnte nicht gelesen werden')
+          // Silently retry
         }
 
-        if (scanActiveRef.current) window.setTimeout(scanFrame, 250)
+        if (scanActiveRef.current) window.setTimeout(scanFrame, 200)
       }
 
       scanFrame()
@@ -237,10 +246,10 @@ export default function AdminScanPage() {
     }
   }
 
-  const preOrderTotal = booking?.preOrders.reduce(
+  const preOrderTotal = (booking?.preOrders || []).reduce(
     (sum, po) => sum + po.menuItem.price * po.quantity,
     0
-  ) || 0
+  )
   const assignedTables = booking ? getAssignedTables(booking) : []
 
   return (
@@ -411,10 +420,10 @@ export default function AdminScanPage() {
                   </div>
                 )}
 
-                {booking.preOrders.length > 0 && (
+                {(booking.preOrders || []).length > 0 && (
                   <div className="bg-surface-container rounded-xl p-3">
                     <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-2">Vorbestellung</p>
-                    {booking.preOrders.map((po, index) => (
+                    {booking.preOrders?.map((po, index) => (
                       <div key={index} className="flex justify-between text-xs py-0.5">
                         <span>{po.quantity}x {po.menuItem.name}</span>
                         <span className="text-on-surface-variant">{(po.menuItem.price * po.quantity / 100).toFixed(2)} €</span>
