@@ -191,7 +191,7 @@ END:VCALENDAR`
           {(booking.preOrders || []).length > 0 && (
             <div className="mx-6 mb-5 bg-white/70 rounded-2xl p-4 border border-[#e8dcc8]">
               <p className="text-[10px] font-bold text-[#a89070] uppercase tracking-[2px] mb-2">Vorbestellung</p>
-              {booking.preOrders.map((po, i) => (
+              {booking.preOrders?.map((po, i) => (
                 <div key={i} className="flex justify-between text-sm py-1">
                   <span className="text-[#3b1f0a]">{po.quantity}× {po.menuItem.name}</span>
                   <span className="font-bold text-[#8B6914]">
