@@ -206,15 +206,18 @@ export default function HomePage() {
     fetch('/api/menu').then(r => r.json()).then(d => {
       if (d.menu && d.menu.length > 0) setMenuData(d.menu)
     }).catch(() => {})
+  }, [])
 
-    // Intersection Observer for scroll reveals
+  // Separate observer — runs AFTER mounted so DOM elements exist
+  useEffect(() => {
+    if (!mounted) return
     const observer = new IntersectionObserver(
       (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } }),
       { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
     )
     document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el))
     return () => observer.disconnect()
-  }, [])
+  }, [mounted])
 
   function getStatus() {
     if (!mounted) return { isOpen: false, label: '...', hours: '...' }
@@ -255,7 +258,7 @@ export default function HomePage() {
         <Image src="/images/hero-website.jpg" alt="O·MO·I Café" fill priority className="object-cover animate-hero-zoom" sizes="100vw" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/70" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <Image src="/images/omoi-logo.png" alt="O·MO·I" width={320} height={160} className="h-28 md:h-40 w-auto object-contain mb-6 animate-logo-float" priority />
+          <Image src="/images/omoi-logo.png" alt="O·MO·I" width={320} height={160} className="h-28 md:h-40 object-contain mb-6 animate-logo-float" style={{ width: 'auto', height: 'auto' }} priority />
           <p className="text-white/90 text-sm md:text-base uppercase tracking-[0.3em] font-medium mb-2 animate-fade-up-d2">
             Brunch · Matcha · Onigirazu
           </p>

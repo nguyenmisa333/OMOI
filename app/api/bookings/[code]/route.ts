@@ -13,8 +13,7 @@ export async function GET(
       .select(`
         *,
         table:tables(*),
-        assignedTables:booking_tables(*, table:tables(*)),
-        preOrders:pre_orders(*, menuItem:menu_items(*))
+        assignedTables:booking_tables(*, table:tables(*))
       `)
       .eq('bookingCode', code)
       .single()

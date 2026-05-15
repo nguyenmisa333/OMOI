@@ -16,7 +16,7 @@ interface Booking {
   specialNote: string | null
   table: { number: number; name: string; zone: string } | null
   assignedTables?: Array<{ table: { number: number; name: string; zone: string } }>
-  preOrders: Array<{ quantity: number; menuItem: { name: string; price: number } }>
+  preOrders?: Array<{ quantity: number; menuItem: { name: string; price: number } }>
 }
 
 interface SiteSettings {
@@ -108,7 +108,7 @@ END:VCALENDAR`
     </div>
   )
 
-  const preOrderTotal = booking.preOrders.reduce((sum, po) => sum + po.menuItem.price * po.quantity, 0)
+  const preOrderTotal = (booking.preOrders || []).reduce((sum, po) => sum + po.menuItem.price * po.quantity, 0)
   const restaurantName = site.restaurantName || 'OMOI · 思い'
   const restaurantAddress = site.restaurantAddress || 'Hauptstätter Str. 57, 70178 Stuttgart'
 
@@ -188,7 +188,7 @@ END:VCALENDAR`
           </div>
 
           {/* Pre-orders */}
-          {booking.preOrders.length > 0 && (
+          {(booking.preOrders || []).length > 0 && (
             <div className="mx-6 mb-5 bg-white/70 rounded-2xl p-4 border border-[#e8dcc8]">
               <p className="text-[10px] font-bold text-[#a89070] uppercase tracking-[2px] mb-2">Vorbestellung</p>
               {booking.preOrders.map((po, i) => (
@@ -255,7 +255,12 @@ END:VCALENDAR`
           <span className="material-symbols-outlined text-lg">event</span>
           Zum Kalender hinzufügen
         </button>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
+          <Link href={`/booking/edit?code=${booking.bookingCode}`}
+            className="py-3.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all text-sm">
+            <span className="material-symbols-outlined text-lg">edit_calendar</span>
+            Ändern
+          </Link>
           <button className="py-3.5 bg-[#f0e8d8] text-[#3b1f0a] rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all text-sm">
             <span className="material-symbols-outlined text-lg">share</span>
             Teilen

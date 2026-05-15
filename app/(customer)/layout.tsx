@@ -77,9 +77,9 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
               </Link>
             )}
             <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
-              <Image src="/images/omoi-avatar.png" alt="OMOI" width={32} height={32} className="rounded-full" />
+              <Image src="/images/omoi-avatar.png" alt="OMOI" width={32} height={32} className="rounded-full" priority />
               {isHome && (
-                <Image src="/images/omoi-logo.png" alt="OMOI" width={96} height={24} className={`h-6 w-auto object-contain transition-all ${!scrolled ? 'invert brightness-200' : ''}`} />
+                <Image src="/images/omoi-logo.png" alt="OMOI" width={96} height={24} className={`h-6 object-contain transition-all ${!scrolled ? 'invert brightness-200' : ''}`} style={{ width: 'auto' }} priority />
               )}
               {!isHome && pathname?.includes('/booking') && (
                 <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">RESERVIERUNG</span>
