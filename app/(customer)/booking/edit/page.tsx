@@ -29,8 +29,10 @@ function EditContent() {
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState<'edit' | 'cancel' | false>(false)
   const [today, setToday] = useState('')
 
   // Editable fields
@@ -127,7 +129,7 @@ function EditContent() {
         setError(data.error || 'Änderung fehlgeschlagen')
         return
       }
-      setSuccess(true)
+      setSuccess('edit')
       setTimeout(() => {
         router.push(`/booking/confirm?code=${booking.bookingCode}`)
       }, 1500)
@@ -135,6 +137,31 @@ function EditContent() {
       setError('Verbindungsfehler')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleCancel() {
+    if (!booking) return
+    setCancelling(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/bookings/${booking.bookingCode}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CANCELLED' }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Stornierung fehlgeschlagen')
+        setShowCancelConfirm(false)
+        return
+      }
+      setSuccess('cancel')
+    } catch {
+      setError('Verbindungsfehler')
+    } finally {
+      setCancelling(false)
+      setShowCancelConfirm(false)
     }
   }
 
@@ -183,13 +210,28 @@ function EditContent() {
     )
   }
 
-  if (success) {
+  if (success === 'edit') {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 text-center">
         <div>
           <span className="material-symbols-outlined text-5xl text-emerald-500 mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
           <p className="text-stone-700 text-xl font-bold mb-2">Erfolgreich geändert!</p>
           <p className="text-stone-400 text-sm">Sie werden weitergeleitet...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (success === 'cancel') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 text-center">
+        <div>
+          <span className="material-symbols-outlined text-5xl text-red-400 mb-4 block" style={{ fontVariationSettings: "'FILL' 1" }}>event_busy</span>
+          <p className="text-stone-700 text-xl font-bold mb-2">Reservierung storniert</p>
+          <p className="text-stone-400 text-sm mb-6">Ihre Reservierung wurde erfolgreich storniert.</p>
+          <Link href="/booking" className="px-6 py-3 bg-[#3b1f0a] text-white rounded-xl text-sm font-bold">
+            Neue Reservierung
+          </Link>
         </div>
       </div>
     )
@@ -368,6 +410,44 @@ function EditContent() {
               </>
             )}
           </button>
+        </div>
+
+        {/* Stornieren */}
+        <div className="pt-2">
+          {!showCancelConfirm ? (
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              className="w-full py-3 text-red-500 text-sm font-semibold hover:text-red-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-base">delete</span>
+              Reservierung stornieren
+            </button>
+          ) : (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+              <p className="text-red-700 font-bold text-sm mb-1">Reservierung wirklich stornieren?</p>
+              <p className="text-red-400 text-xs mb-4">Diese Aktion kann nicht rückgängig gemacht werden.</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="flex-1 py-2.5 bg-white border border-stone-200 rounded-xl text-sm font-bold text-stone-600 active:scale-95 transition-all"
+                >
+                  Nein, behalten
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                  {cancelling ? (
+                    <span className="material-symbols-outlined animate-spin text-base">progress_activity</span>
+                  ) : (
+                    <span className="material-symbols-outlined text-base">delete_forever</span>
+                  )}
+                  Ja, stornieren
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
