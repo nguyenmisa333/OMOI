@@ -531,8 +531,8 @@ export default function HomePage() {
             <div>
               <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-4">O·MO·I</p>
               <p className="text-white/50 text-sm italic mb-4">&quot;Gefühl, Gedanke, Sehnsucht und Liebe&quot;</p>
-              <a href="https://instagram.com/o.mo.i" target="_blank" rel="noopener noreferrer"
-                className="text-[#C4975C] text-sm font-semibold hover:underline">@o.mo.i</a>
+              <a href="https://instagram.com/omoi.stuttgart" target="_blank" rel="noopener noreferrer"
+                className="text-[#C4975C] text-sm font-semibold hover:underline">@omoi.stuttgart</a>
             </div>
             {/* Kontakt */}
             <div>

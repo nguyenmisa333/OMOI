@@ -29,7 +29,7 @@ export default function ImpressumPage() {
           <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[2px] mb-2">Kontakt</p>
           <h2 className="text-xl font-bold text-[#3b1f0a] mb-3 pb-2 border-b border-stone-200">Kontaktdaten</h2>
           <p className="text-sm text-stone-500">E-Mail: <a href="mailto:hello@o-mo-i.de" className="text-[#C4975C] font-semibold hover:underline">hello@o-mo-i.de</a></p>
-          <p className="text-sm text-stone-500">Instagram: <a href="https://instagram.com/o.mo.i" target="_blank" rel="noopener noreferrer" className="text-[#C4975C] font-semibold hover:underline">@o.mo.i</a></p>
+          <p className="text-sm text-stone-500">Instagram: <a href="https://instagram.com/omoi.stuttgart" target="_blank" rel="noopener noreferrer" className="text-[#C4975C] font-semibold hover:underline">@omoi.stuttgart</a></p>
         </div>
 
         {/* Haftung Inhalte */}

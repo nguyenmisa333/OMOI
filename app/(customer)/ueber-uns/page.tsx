@@ -96,7 +96,7 @@ export default function UeberUnsPage() {
           <p><strong className="text-[#3b1f0a]">So:</strong> {so ? `${so.open} – ${so.close}` : '...'}</p>
           <p className="text-xs text-stone-400">Montag: Ruhetag · An Feiertagen wie sonntags</p>
           <p><strong className="text-[#3b1f0a]">E-Mail:</strong> hello@o-mo-i.de</p>
-          <p><strong className="text-[#3b1f0a]">Instagram:</strong> @o.mo.i</p>
+          <p><strong className="text-[#3b1f0a]">Instagram:</strong> <a href="https://instagram.com/omoi.stuttgart" target="_blank" rel="noopener noreferrer" className="text-[#C4975C] font-semibold hover:underline">@omoi.stuttgart</a></p>
         </div>
       </div>
     </div>

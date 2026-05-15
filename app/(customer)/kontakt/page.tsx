@@ -80,7 +80,7 @@ export default function KontaktPage() {
             { icon: '📍', label: 'Adresse', value: 'Hauptstätter Str. 57\n70178 Stuttgart-Mitte' },
             { icon: '✉️', label: 'E-Mail', value: 'hello@o-mo-i.de' },
             { icon: '🌐', label: 'Website', value: 'o-mo-i.de' },
-            { icon: '📱', label: 'Instagram', value: '@o.mo.i' },
+            { icon: '📱', label: 'Instagram', value: '@omoi.stuttgart' },
             { icon: '🛜', label: 'WLAN', value: 'OMOI guest · Passwort: omoi2026' },
           ].map(item => (
             <div key={item.label} className="flex gap-4 p-4 bg-white rounded-2xl border border-[#e8dcc8]">

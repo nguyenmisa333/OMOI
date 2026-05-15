@@ -74,7 +74,7 @@ export default function RootLayout({
                 { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Friday", "Saturday"], "opens": "12:00", "closes": "22:00" },
                 { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "12:00", "closes": "20:00" }
               ],
-              "sameAs": ["https://instagram.com/o.mo.i"]
+              "sameAs": ["https://instagram.com/omoi.stuttgart"]
             })
           }}
         />
