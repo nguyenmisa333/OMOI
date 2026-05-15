@@ -62,8 +62,7 @@ export default function UeberUnsPage() {
             vegetarischen Super Mario.
           </p>
           <p>
-            Dazu gibt es Brunch-Klassiker beim <strong className="text-[#3b1f0a]">Early Bird</strong>,
-            herzhafte <strong className="text-[#3b1f0a]">Bowls</strong> aus Sushireis, Avocado und Kimchi,
+            Dazu gibt es herzhafte <strong className="text-[#3b1f0a]">Bowls</strong> aus Sushireis, Avocado und Kimchi,
             hausgemachte <strong className="text-[#3b1f0a]">Slow Juices</strong> – und natürlich unser
             legendäres <strong className="text-[#3b1f0a]">Matcha Tiramisu</strong>.
           </p>
@@ -76,7 +75,6 @@ export default function UeberUnsPage() {
             { emoji: '🍵', title: 'Matcha & Hojicha', desc: 'Ceremonial Grade aus Japan' },
             { emoji: '🔪', title: 'Signature Onigirazu', desc: 'Hot Red Tuna · Salmon · Chicken' },
             { emoji: '🥗', title: 'O·MO·I Bowls', desc: 'Sushireis, Avocado, Kimchi, Nori' },
-            { emoji: '🌅', title: 'Early Bird Brunch', desc: 'Täglich 8:00 – 10:30 Uhr' },
             { emoji: '🍋', title: 'Slow-Juice Bar', desc: 'DetoX Green Glow · Yuzu Lemonade' },
             { emoji: '🍰', title: 'Matcha Tiramisu', desc: 'Unser Signature Dessert' },
           ].map(item => (
