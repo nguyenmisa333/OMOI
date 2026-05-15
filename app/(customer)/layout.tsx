@@ -9,7 +9,6 @@ import BottomNav from '@/components/shared/BottomNav'
 const navLinks = [
   { href: '/', icon: 'home', label: 'Startseite' },
   { href: '/booking', icon: 'event_seat', label: 'Reservieren' },
-  { href: '/account', icon: 'history', label: 'Verlauf' },
   { href: '/kontakt', icon: 'call', label: 'Kontakt' },
   { href: '/ueber-uns', icon: 'info', label: 'Über uns' },
   { href: '/impressum', icon: 'gavel', label: 'Impressum' },
@@ -84,9 +83,7 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
               {!isHome && pathname?.includes('/booking') && (
                 <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">RESERVIERUNG</span>
               )}
-              {!isHome && pathname?.includes('/account') && (
-                <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">VERLAUF</span>
-              )}
+
               {!isHome && pathname?.includes('/kontakt') && (
                 <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">KONTAKT</span>
               )}

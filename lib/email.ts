@@ -61,6 +61,8 @@ async function buildEmail(data: BookingEmailData): Promise<string> {
   const confirmUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000') + '/booking/confirm?code=' + data.bookingCode
   const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=3b1f0a&bgcolor=ffffff&data=' + encodeURIComponent(confirmUrl)
 
+  const editUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000') + '/booking/edit?code=' + data.bookingCode
+
   // ── Sections ──────────────────────────────────────────────────────────────
   const noteSection = data.specialNote
     ? '<div style="margin:0 24px 16px;background:#fff8ee;border:1px solid #f0ddb8;border-radius:12px;padding:12px 16px;">'
@@ -73,6 +75,18 @@ async function buildEmail(data: BookingEmailData): Promise<string> {
     + '<p style="font-size:9px;font-weight:700;color:#a89070;letter-spacing:3px;text-transform:uppercase;margin:0 0 12px;">Ihr QR-Code</p>'
     + '<a href="' + confirmUrl + '"><img src="' + qrUrl + '" alt="QR Code" width="160" height="160" style="border-radius:10px;display:block;margin:0 auto;" /></a>'
     + '<p style="font-size:11px;color:#a89070;margin:12px 0 0;line-height:1.4;">Zeigen Sie diesen Code dem Personal für schnellen Check-in.</p>'
+    + '</div>'
+
+  // Action buttons: View + Edit
+  const actionSection = '<div style="margin:0 24px 20px;text-align:center;">'
+    + '<table style="width:100%;border-collapse:collapse;"><tr>'
+    + '<td style="padding:0 4px 0 0;width:50%;">'
+    + '<a href="' + confirmUrl + '" style="display:block;padding:12px 8px;background:#3b1f0a;color:white;border-radius:12px;font-size:12px;font-weight:700;text-decoration:none;text-align:center;">Reservierung ansehen</a>'
+    + '</td>'
+    + '<td style="padding:0 0 0 4px;width:50%;">'
+    + '<a href="' + editUrl + '" style="display:block;padding:12px 8px;background:#faf6f0;color:#3b1f0a;border:1.5px solid #d4c4a8;border-radius:12px;font-size:12px;font-weight:700;text-decoration:none;text-align:center;">Ändern / Stornieren</a>'
+    + '</td>'
+    + '</tr></table>'
     + '</div>'
 
   let promoSection = ''
@@ -173,6 +187,7 @@ async function buildEmail(data: BookingEmailData): Promise<string> {
     // Sections
     + noteSection
     + qrSection
+    + actionSection
     + promoSection
 
     // Logo
