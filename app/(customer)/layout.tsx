@@ -75,10 +75,10 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                 arrow_back
               </Link>
             )}
-            <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0" onClick={() => setMenuOpen(false)}>
               <Image src="/images/omoi-avatar.png" alt="OMOI" width={32} height={32} className="rounded-full" priority />
               {isHome && (
-                <Image src="/images/omoi-logo.png" alt="OMOI" width={96} height={24} className={`h-6 object-contain transition-all ${!scrolled ? 'invert brightness-200' : ''}`} style={{ width: 'auto' }} priority />
+                <Image src="/images/omoi-logo.png" alt="OMOI" width={96} height={24} className={`h-6 object-contain transition-all md:hidden lg:block ${!scrolled ? 'invert brightness-200' : ''}`} style={{ width: 'auto' }} priority />
               )}
               {!isHome && pathname?.includes('/booking') && (
                 <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">RESERVIERUNG</span>
@@ -91,7 +91,7 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                 <span className="text-sm font-bold text-stone-900 uppercase tracking-widest">ÜBER UNS</span>
               )}
             </Link>
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-stone-200 bg-surface-container md:hidden">
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-stone-200 bg-surface-container md:hidden flex-shrink-0">
               <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                 <span className="material-symbols-outlined">person</span>
               </div>
