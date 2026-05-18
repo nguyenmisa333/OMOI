@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 const navItems = [
   { href: '/', icon: 'home', label: 'Startseite' },
   { href: '/booking', icon: 'event_seat', label: 'Reservieren' },
-  { href: '/account', icon: 'history', label: 'Verlauf' },
+  { href: '/kontakt', icon: 'call', label: 'Kontakt' },
 ]
 
 export default function BottomNav() {
