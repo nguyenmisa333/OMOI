@@ -29,13 +29,19 @@ interface ZoneArea {
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const ZONE_DEFAULTS: ZoneArea[] = [
-  { id: 'INNEN',    label: 'Innenraum',    x: 10,  y: 10,  w: 560, h: 400, color: '#7c5c38', bg: 'rgba(253,248,242,0.9)', border: '#e8d9c0' },
-  { id: 'BAR',      label: 'Küchen-Bar',   x: 590, y: 10,  w: 200, h: 180, color: '#6b3fa0', bg: 'rgba(247,242,249,0.9)', border: '#d4b8e8' },
-  { id: 'TERRASSE', label: 'Terrasse',     x: 10,  y: 430, w: 380, h: 180, color: '#2d6a4f', bg: 'rgba(240,249,244,0.9)', border: '#a8d9be' },
-  { id: 'WINDOW',   label: 'Fensterplatz', x: 590, y: 210, w: 200, h: 200, color: '#335577', bg: 'rgba(240,246,255,0.9)', border: '#b8d4f0' },
-  { id: 'WC',       label: 'WC / Eingang', x: 405, y: 430, w: 165, h: 180, color: '#888',    bg: 'rgba(245,245,244,0.9)', border: '#d0d0c8' },
-]
+type FloorView = 'restaurant' | 'terrasse'
+
+const ZONE_MAP: Record<FloorView, ZoneArea[]> = {
+  restaurant: [
+    { id: 'KÜCHE',   label: 'Küche',             x: 20,  y: 210, w: 130, h: 370, color: '#78716c', bg: 'rgba(245,245,244,0.92)', border: '#d6d3d1' },
+    { id: 'BAR',     label: 'Bar',               x: 150, y: 210, w: 100, h: 370, color: '#78716c', bg: 'rgba(245,245,244,0.92)', border: '#d6d3d1' },
+    { id: 'ERHÖHT',  label: 'Erhöhter Bereich',  x: 270, y: 210, w: 270, h: 370, color: '#7c5c38', bg: 'rgba(253,248,242,0.9)',  border: '#e8d9c0' },
+  ],
+  terrasse: [
+    { id: 'TERRASSE', label: 'Terrasse', x: 20, y: 40, w: 720, h: 540, color: '#2d6a4f', bg: 'rgba(240,249,244,0.9)', border: '#a8d9be' },
+  ],
+}
+const ZONE_DEFAULTS = [...ZONE_MAP.restaurant, ...ZONE_MAP.terrasse]
 
 const STATUS_CFG: Record<string, { bg: string; border: string; text: string; dot: string; label: string }> = {
   EMPTY:    { bg: '#f0fdf4', border: '#22c55e', text: '#15803d', dot: '#22c55e', label: 'Frei' },
@@ -93,11 +99,11 @@ function TableNode({ table, selected, editMode, onDown, onClick, booking }: {
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         transition: 'box-shadow 0.1s',
       }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: cfg.text, lineHeight: 1 }}>
-          T-{String(table.number).padStart(2, '0')}
+        <span style={{ fontSize: 13, fontWeight: 800, color: cfg.text, lineHeight: 1 }}>
+          {table.number}
         </span>
         {table.shape !== 'bar' && (
-          <span style={{ fontSize: 9, color: '#aaa', marginTop: 2 }}>{table.capacity}P</span>
+          <span style={{ fontSize: 9, color: '#aaa', marginTop: 1 }}>−{table.capacity}</span>
         )}
         {/* Booking overlay info */}
         {booking ? (
@@ -232,7 +238,7 @@ function ZoneBox({ zone, editMode, onMove, onResize }: {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const CANVAS_W = 820
-const CANVAS_H = 640
+const CANVAS_H = 620
 
 export default function AdminFloorPage() {
   const [tables, setTables]         = useState<Table[]>([])
@@ -241,7 +247,8 @@ export default function AdminFloorPage() {
   const [editMode, setEditMode]     = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showPicker, setShowPicker] = useState(false)
-  const [pickerZone, setPickerZone] = useState('INNEN')
+  const [pickerZone, setPickerZone] = useState('ERHÖHT')
+  const [floorView, setFloorView]   = useState<FloorView>('restaurant')
 
   // ── Booking overlay ───────────────────────────────────────────────────────
   const todayStr = new Date().toISOString().split('T')[0]
@@ -330,36 +337,64 @@ export default function AdminFloorPage() {
     localStorage.setItem('omoi_floor_v2', JSON.stringify({ tables: t, zones: zns }))
   }
 
+  // Zone IDs visible per view
+  const RESTAURANT_ZONES = ['KÜCHE', 'BAR', 'ERHÖHT', 'RESTAURANT', 'EINGANG']
+  const TERRASSE_ZONES   = ['TERRASSE']
+  const activeZoneIds = floorView === 'restaurant' ? RESTAURANT_ZONES : TERRASSE_ZONES
+  const visibleZones  = zones.filter(z => (ZONE_MAP[floorView] || []).some(zm => zm.id === z.id))
+  const visibleTables = tables.filter(t => activeZoneIds.includes(t.zone))
+
   function generateDemo(saved: Record<string, unknown>): Table[] {
     const savedTables = (saved as { tables?: Record<string, { x?: number; y?: number; shape?: Table['shape']; zone?: string }> }).tables
     const defs = [
-      { n:1, z:'INNEN',    x:40,  y:60,  s:'round'  as const, c:2 },
-      { n:2, z:'INNEN',    x:120, y:60,  s:'round'  as const, c:2 },
-      { n:3, z:'INNEN',    x:210, y:60,  s:'round'  as const, c:4 },
-      { n:4, z:'INNEN',    x:310, y:60,  s:'square' as const, c:4 },
-      { n:5, z:'INNEN',    x:40,  y:170, s:'rect'   as const, c:6 },
-      { n:6, z:'INNEN',    x:200, y:170, s:'rect'   as const, c:6 },
-      { n:7, z:'INNEN',    x:40,  y:270, s:'square' as const, c:4 },
-      { n:8, z:'INNEN',    x:140, y:270, s:'square' as const, c:4 },
-      { n:9, z:'BAR',      x:620, y:50,  s:'bar'    as const, c:1 },
-      {n:10, z:'BAR',      x:670, y:50,  s:'bar'    as const, c:1 },
-      {n:11, z:'BAR',      x:720, y:50,  s:'bar'    as const, c:1 },
-      {n:12, z:'BAR',      x:620, y:110, s:'bar'    as const, c:2 },
-      {n:13, z:'TERRASSE', x:40,  y:460, s:'round'  as const, c:2 },
-      {n:14, z:'TERRASSE', x:120, y:460, s:'round'  as const, c:2 },
-      {n:15, z:'TERRASSE', x:210, y:460, s:'rect'   as const, c:6 },
-      {n:16, z:'WINDOW',   x:620, y:230, s:'square' as const, c:2 },
-      {n:17, z:'WINDOW',   x:700, y:230, s:'square' as const, c:2 },
-      {n:18, z:'WINDOW',   x:620, y:310, s:'square' as const, c:4 },
+      // ── Restaurant: Eingang area ──
+      { n:13, z:'RESTAURANT', x:100, y:80,  s:'round'  as const, c:2 },
+      { n:12, z:'RESTAURANT', x:190, y:80,  s:'round'  as const, c:2 },
+      { n:11, z:'RESTAURANT', x:280, y:80,  s:'round'  as const, c:2 },
+      // ── Restaurant: Right wall ──
+      { n:8,  z:'RESTAURANT', x:680, y:80,  s:'square' as const, c:2 },
+      { n:7,  z:'RESTAURANT', x:680, y:170, s:'square' as const, c:2 },
+      { n:6,  z:'RESTAURANT', x:680, y:260, s:'square' as const, c:2 },
+      { n:5,  z:'RESTAURANT', x:680, y:350, s:'square' as const, c:2 },
+      // ── Restaurant: Bottom right ──
+      { n:1,  z:'RESTAURANT', x:620, y:480, s:'square' as const, c:2 },
+      { n:2,  z:'RESTAURANT', x:710, y:480, s:'square' as const, c:2 },
+      // ── Erhöhter Bereich (raised +2 steps) ──
+      { n:31, z:'ERHÖHT', x:310, y:250, s:'round' as const, c:2 },
+      { n:21, z:'ERHÖHT', x:420, y:250, s:'round' as const, c:2 },
+      { n:32, z:'ERHÖHT', x:310, y:360, s:'round' as const, c:2 },
+      { n:22, z:'ERHÖHT', x:420, y:360, s:'round' as const, c:2 },
+      { n:33, z:'ERHÖHT', x:310, y:470, s:'round' as const, c:2 },
+      { n:23, z:'ERHÖHT', x:420, y:470, s:'round' as const, c:2 },
+      // ── Terrasse: Row 1 (top, near Bambus) ──
+      { n:83,  z:'TERRASSE', x:100, y:100, s:'square' as const, c:2 },
+      { n:73,  z:'TERRASSE', x:250, y:100, s:'square' as const, c:2 },
+      { n:63,  z:'TERRASSE', x:400, y:100, s:'square' as const, c:2 },
+      { n:53,  z:'TERRASSE', x:550, y:100, s:'square' as const, c:2 },
+      // ── Terrasse: Row 2 (middle) ──
+      { n:102, z:'TERRASSE', x:40,  y:240, s:'square' as const, c:2 },
+      { n:82,  z:'TERRASSE', x:170, y:240, s:'square' as const, c:2 },
+      { n:72,  z:'TERRASSE', x:310, y:240, s:'square' as const, c:2 },
+      { n:62,  z:'TERRASSE', x:450, y:240, s:'square' as const, c:2 },
+      { n:52,  z:'TERRASSE', x:590, y:240, s:'square' as const, c:2 },
+      // ── Terrasse: Row 3 (bottom) ──
+      { n:101, z:'TERRASSE', x:40,  y:390, s:'square' as const, c:2 },
+      { n:81,  z:'TERRASSE', x:170, y:390, s:'square' as const, c:2 },
+      { n:71,  z:'TERRASSE', x:310, y:390, s:'square' as const, c:2 },
+      { n:61,  z:'TERRASSE', x:450, y:390, s:'square' as const, c:2 },
+      { n:51,  z:'TERRASSE', x:590, y:390, s:'square' as const, c:2 },
+      // ── Terrasse: Extra (bottom-left) ──
+      { n:92,  z:'TERRASSE', x:170, y:500, s:'square' as const, c:2 },
+      { n:91,  z:'TERRASSE', x:280, y:500, s:'square' as const, c:2 },
     ]
     return defs.map(d => ({
-      id: `demo-${d.n}`, number: d.n, name: `Tisch ${d.n}`,
-      zone: savedTables?.[`demo-${d.n}`]?.zone || d.z,
+      id: `table-${d.n}`, number: d.n, name: `Tisch ${d.n}`,
+      zone: savedTables?.[`table-${d.n}`]?.zone || d.z,
       capacity: d.c,
-      status: ['EMPTY','EMPTY','BOOKED','SEATED','EMPTY'][d.n % 5] || 'EMPTY',
-      positionX: savedTables?.[`demo-${d.n}`]?.x ?? d.x,
-      positionY: savedTables?.[`demo-${d.n}`]?.y ?? d.y,
-      shape: savedTables?.[`demo-${d.n}`]?.shape || d.s,
+      status: 'EMPTY',
+      positionX: savedTables?.[`table-${d.n}`]?.x ?? d.x,
+      positionY: savedTables?.[`table-${d.n}`]?.y ?? d.y,
+      shape: savedTables?.[`table-${d.n}`]?.shape || d.s,
     }))
   }
 
@@ -475,10 +510,10 @@ export default function AdminFloorPage() {
   if (loading) return <div className="p-8"><div className="h-[640px] skeleton rounded-2xl" /></div>
 
   const counts = {
-    EMPTY:    tables.filter(t => t.status === 'EMPTY').length,
-    BOOKED:   tables.filter(t => t.status === 'BOOKED').length,
-    SEATED:   tables.filter(t => t.status === 'SEATED').length,
-    CLEANING: tables.filter(t => t.status === 'CLEANING').length,
+    EMPTY:    visibleTables.filter(t => t.status === 'EMPTY').length,
+    BOOKED:   visibleTables.filter(t => t.status === 'BOOKED').length,
+    SEATED:   visibleTables.filter(t => t.status === 'SEATED').length,
+    CLEANING: visibleTables.filter(t => t.status === 'CLEANING').length,
   }
 
   return (
@@ -487,7 +522,19 @@ export default function AdminFloorPage() {
       {/* ── Toolbar ──────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-stone-100 shrink-0 gap-4 flex-wrap">
         <div className="flex items-center gap-5">
-          <h1 className="text-lg font-bold text-on-surface">Live-Tischplan</h1>
+          <h1 className="text-lg font-bold text-on-surface">Tischplan</h1>
+
+          {/* View tabs */}
+          <div className="flex bg-stone-100 rounded-xl p-0.5">
+            {(['restaurant', 'terrasse'] as FloorView[]).map(v => (
+              <button key={v} onClick={() => { setFloorView(v); setSelectedId(null) }}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  floorView === v ? 'bg-white text-[#3b1f0a] shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                }`}>
+                {v === 'restaurant' ? 'Restaurant' : 'Terrasse'}
+              </button>
+            ))}
+          </div>
 
           {/* Date + time selector */}
           <div className="flex items-center gap-2 bg-[#faf6f0] border border-[#e8dcc8] rounded-xl px-3 py-1.5">
@@ -626,8 +673,8 @@ export default function AdminFloorPage() {
               onPointerMove={editMode ? handleCanvasMove : undefined}
               onPointerUp={editMode ? handleCanvasUp : undefined}
             >
-              {/* Zone boxes — rendered first (below tables) */}
-              {zones.map(zone => (
+              {/* Zone boxes */}
+              {visibleZones.map(zone => (
                 <ZoneBox
                   key={zone.id}
                   zone={zone}
@@ -637,8 +684,38 @@ export default function AdminFloorPage() {
                 />
               ))}
 
+              {/* Decorative labels */}
+              {floorView === 'restaurant' && (
+                <>
+                  {/* EINGANG label */}
+                  <div style={{ position: 'absolute', top: 10, left: 280, textAlign: 'center', zIndex: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 6, color: '#a89070', textTransform: 'uppercase' }}>Eingang</span>
+                    <div style={{ margin: '4px auto 0', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '8px solid #a89070' }} />
+                  </div>
+                  {/* +2 STUFEN label */}
+                  <div style={{ position: 'absolute', top: 170, left: 340, zIndex: 2, textAlign: 'center' }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 4, color: '#a89070', textTransform: 'uppercase' }}>+ 2 Stufen</span>
+                    <div style={{ margin: '2px auto 0', width: 60, height: 1.5, backgroundColor: '#a89070' }} />
+                  </div>
+                </>
+              )}
+              {floorView === 'terrasse' && (
+                <>
+                  {/* BAMBUS label */}
+                  <div style={{ position: 'absolute', top: 50, left: 0, right: 0, textAlign: 'center', zIndex: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 8, color: '#2d6a4f', textTransform: 'uppercase', opacity: 0.5 }}>B a m b u s</span>
+                    <div style={{ margin: '4px 40px 0', borderTop: '2px dotted #a8d9be' }} />
+                  </div>
+                  {/* PFLANZEN label (vertical, right side) */}
+                  <div style={{ position: 'absolute', top: 80, right: 10, zIndex: 2, writingMode: 'vertical-rl', letterSpacing: 6 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#2d6a4f', textTransform: 'uppercase', opacity: 0.5 }}>Pflanzen</span>
+                    <div style={{ position: 'absolute', top: 0, bottom: 0, left: -6, borderLeft: '2px dotted #a8d9be' }} />
+                  </div>
+                </>
+              )}
+
               {/* Tables */}
-              {tables.map(table => (
+              {visibleTables.map(table => (
                 <TableNode
                   key={table.id}
                   table={table}
