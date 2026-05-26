@@ -33,21 +33,21 @@ type FloorView = 'restaurant' | 'terrasse'
 
 const ZONE_MAP: Record<FloorView, ZoneArea[]> = {
   restaurant: [
-    { id: 'KÜCHE',   label: 'Küche',             x: 20,  y: 210, w: 130, h: 370, color: '#78716c', bg: 'rgba(245,245,244,0.92)', border: '#d6d3d1' },
-    { id: 'BAR',     label: 'Bar',               x: 150, y: 210, w: 100, h: 370, color: '#78716c', bg: 'rgba(245,245,244,0.92)', border: '#d6d3d1' },
-    { id: 'ERHÖHT',  label: 'Erhöhter Bereich',  x: 270, y: 210, w: 270, h: 370, color: '#7c5c38', bg: 'rgba(253,248,242,0.9)',  border: '#e8d9c0' },
+    { id: 'KÜCHE',   label: 'K Ü C H E',         x: 18,  y: 230, w: 130, h: 330, color: '#78716c', bg: 'rgba(250,249,247,0.95)', border: '#c8c4be' },
+    { id: 'BAR',     label: 'B A R',             x: 148, y: 230, w: 90,  h: 330, color: '#78716c', bg: 'rgba(250,249,247,0.95)', border: '#c8c4be' },
+    { id: 'ERHÖHT',  label: 'Erhöhter Bereich',  x: 330, y: 200, w: 210, h: 380, color: '#7c5c38', bg: 'rgba(248,244,238,0.95)', border: '#d4c4a8' },
   ],
   terrasse: [
-    { id: 'TERRASSE', label: 'Terrasse', x: 20, y: 40, w: 720, h: 540, color: '#2d6a4f', bg: 'rgba(240,249,244,0.9)', border: '#a8d9be' },
+    { id: 'TERRASSE', label: 'Terrasse', x: 20, y: 40, w: 730, h: 545, color: '#2d6a4f', bg: 'rgba(245,250,247,0.5)', border: '#c8e0d0' },
   ],
 }
 const ZONE_DEFAULTS = [...ZONE_MAP.restaurant, ...ZONE_MAP.terrasse]
 
 const STATUS_CFG: Record<string, { bg: string; border: string; text: string; dot: string; label: string }> = {
-  EMPTY:    { bg: '#f0fdf4', border: '#22c55e', text: '#15803d', dot: '#22c55e', label: 'Frei' },
-  BOOKED:   { bg: '#fffbeb', border: '#f59e0b', text: '#b45309', dot: '#f59e0b', label: 'Reserviert' },
-  SEATED:   { bg: '#fff1f2', border: '#f43f5e', text: '#be123c', dot: '#f43f5e', label: 'Besetzt' },
-  CLEANING: { bg: '#faf5ff', border: '#a855f7', text: '#7e22ce', dot: '#a855f7', label: 'Räumen' },
+  EMPTY:    { bg: '#3b1f0a', border: '#3b1f0a', text: '#ffffff', dot: '#22c55e', label: 'Frei' },
+  BOOKED:   { bg: '#f59e0b', border: '#f59e0b', text: '#ffffff', dot: '#f59e0b', label: 'Reserviert' },
+  SEATED:   { bg: '#f43f5e', border: '#f43f5e', text: '#ffffff', dot: '#f43f5e', label: 'Besetzt' },
+  CLEANING: { bg: '#a855f7', border: '#a855f7', text: '#ffffff', dot: '#a855f7', label: 'Räumen' },
 }
 
 const SHAPES = [
@@ -64,7 +64,7 @@ const SHAPES = [
 function getTableSize(t: Pick<Table, 'shape' | 'capacity'>) {
   if (t.shape === 'bar')  return { w: t.capacity === 1 ? 44 : 82, h: 40 }
   if (t.shape === 'rect') return { w: t.capacity >= 8 ? 120 : 100, h: 58 }
-  const b = t.capacity >= 4 ? 72 : 60
+  const b = t.capacity >= 4 ? 72 : 65
   return { w: b, h: b }
 }
 
@@ -93,43 +93,24 @@ function TableNode({ table, selected, editMode, onDown, onClick, booking }: {
         cursor: editMode ? 'grab' : 'pointer', zIndex: selected ? 30 : 15 }}
     >
       <div style={{ width: '100%', height: '100%', backgroundColor: cfg.bg,
-        border: `2px solid ${selected ? '#1a0a00' : cfg.border}`,
+        border: selected ? '3px solid #C4975C' : 'none',
         borderRadius: radius, position: 'relative', overflow: 'hidden',
-        boxShadow: selected ? '0 0 0 3px rgba(26,10,0,0.2), 0 4px 12px rgba(0,0,0,0.15)' : '0 2px 6px rgba(0,0,0,0.08)',
+        boxShadow: selected ? '0 0 0 3px rgba(196,151,92,0.3), 0 4px 12px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.15)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        transition: 'box-shadow 0.1s',
+        transition: 'all 0.15s',
       }}>
-        <span style={{ fontSize: 13, fontWeight: 800, color: cfg.text, lineHeight: 1 }}>
+        <span style={{ fontSize: 16, fontWeight: 800, color: cfg.text, lineHeight: 1 }}>
           {table.number}
         </span>
-        {table.shape !== 'bar' && (
-          <span style={{ fontSize: 9, color: '#aaa', marginTop: 1 }}>−{table.capacity}</span>
-        )}
-        {/* Booking overlay info */}
-        {booking ? (
-          <>
-            <span style={{ fontSize: 8, color: cfg.text, fontWeight: 700, marginTop: 1, maxWidth: w - 8,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2 }}>
-              {booking.guestName.split(' ')[0]}
-            </span>
-            <span style={{ fontSize: 7.5, color: cfg.text, opacity: 0.8 }}>
-              {booking.startTime}–{booking.endTime} · {booking.guestCount}P
-            </span>
-          </>
-        ) : table.bookings?.[0] && (
-          <span style={{ fontSize: 8, color: cfg.text, opacity: 0.8, marginTop: 1 }}>
-            {table.bookings[0].startTime}
+        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>−{table.capacity}</span>
+        {/* Booking overlay */}
+        {booking && (
+          <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.7)', fontWeight: 600, marginTop: 2, maxWidth: w - 8,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
+            {booking.guestName.split(' ')[0]} · {booking.startTime}
           </span>
         )}
-        {/* Zone stripe at bottom */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3,
-          backgroundColor: zoneColor, opacity: 0.4,
-          borderRadius: table.shape === 'round' ? '0 0 50% 50%' : '0 0 8px 8px' }} />
       </div>
-      {/* Status dot */}
-      <div style={{ position: 'absolute', top: -4, right: -4, width: 10, height: 10,
-        backgroundColor: cfg.dot, borderRadius: '50%', border: '2px solid white',
-        boxShadow: '0 0 4px rgba(0,0,0,0.2)' }} />
     </div>
   )
 }
@@ -193,31 +174,22 @@ function ZoneBox({ zone, editMode, onMove, onResize }: {
       position: 'absolute', left: zone.x, top: zone.y,
       width: zone.w, height: zone.h,
       backgroundColor: zone.bg,
-      border: `2px ${editMode ? 'solid' : 'dashed'} ${zone.border}`,
-      borderRadius: 16, zIndex: 1,
+      border: `1.5px solid ${zone.border}`,
+      borderRadius: 12, zIndex: 1,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      {/* Draggable header strip */}
-      <div
-        onPointerDown={startMove}
-        onPointerMove={onMoveMove}
-        onPointerUp={endMove}
-        style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 28,
-          display: 'flex', alignItems: 'center', paddingLeft: 12, gap: 6,
-          cursor: editMode ? 'move' : 'default',
-          borderRadius: '14px 14px 0 0',
-          backgroundColor: editMode ? `${zone.border}33` : 'transparent',
-          userSelect: 'none',
-        }}
-      >
-        {editMode && (
-          <span style={{ fontSize: 10, color: zone.color, opacity: 0.5 }}>⠿</span>
-        )}
-        <span style={{ fontSize: 10, fontWeight: 700, color: zone.color,
-          letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75 }}>
+      {/* Zone label — centered vertically for tall zones, or top for wide zones */}
+      {(zone.id === 'KÜCHE' || zone.id === 'BAR') ? (
+        <span style={{ writingMode: 'vertical-rl', fontSize: 11, fontWeight: 700, letterSpacing: 6,
+          color: zone.color, textTransform: 'uppercase', opacity: 0.7, userSelect: 'none' }}>
           {zone.label}
         </span>
-      </div>
+      ) : (
+        <span style={{ position: 'absolute', top: 10, left: 14, fontSize: 10, fontWeight: 700, letterSpacing: 3,
+          color: zone.color, textTransform: 'uppercase', opacity: 0.75, userSelect: 'none' }}>
+          {zone.label}
+        </span>
+      )}
 
       {/* Resize handles (edit mode only) */}
       {editMode && handles.map(h => (
@@ -347,45 +319,45 @@ export default function AdminFloorPage() {
   function generateDemo(saved: Record<string, unknown>): Table[] {
     const savedTables = (saved as { tables?: Record<string, { x?: number; y?: number; shape?: Table['shape']; zone?: string }> }).tables
     const defs = [
-      // ── Restaurant: Eingang area ──
-      { n:13, z:'RESTAURANT', x:100, y:80,  s:'round'  as const, c:2 },
-      { n:12, z:'RESTAURANT', x:190, y:80,  s:'round'  as const, c:2 },
-      { n:11, z:'RESTAURANT', x:280, y:80,  s:'round'  as const, c:2 },
+      // ── Restaurant: Eingang area (13,12 square — 11 round) ──
+      { n:13, z:'RESTAURANT', x:22,  y:65,  s:'square' as const, c:2 },
+      { n:12, z:'RESTAURANT', x:105, y:65,  s:'square' as const, c:2 },
+      { n:11, z:'RESTAURANT', x:200, y:60,  s:'round'  as const, c:2 },
       // ── Restaurant: Right wall ──
-      { n:8,  z:'RESTAURANT', x:680, y:80,  s:'square' as const, c:2 },
-      { n:7,  z:'RESTAURANT', x:680, y:170, s:'square' as const, c:2 },
-      { n:6,  z:'RESTAURANT', x:680, y:260, s:'square' as const, c:2 },
-      { n:5,  z:'RESTAURANT', x:680, y:350, s:'square' as const, c:2 },
+      { n:8,  z:'RESTAURANT', x:560, y:65,  s:'square' as const, c:2 },
+      { n:7,  z:'RESTAURANT', x:640, y:65,  s:'square' as const, c:2 },
+      { n:6,  z:'RESTAURANT', x:710, y:65,  s:'square' as const, c:2 },
+      { n:5,  z:'RESTAURANT', x:780, y:65,  s:'square' as const, c:2 },
       // ── Restaurant: Bottom right ──
-      { n:1,  z:'RESTAURANT', x:620, y:480, s:'square' as const, c:2 },
-      { n:2,  z:'RESTAURANT', x:710, y:480, s:'square' as const, c:2 },
+      { n:1,  z:'RESTAURANT', x:640, y:330, s:'square' as const, c:2 },
+      { n:2,  z:'RESTAURANT', x:740, y:330, s:'square' as const, c:2 },
       // ── Erhöhter Bereich (raised +2 steps) ──
-      { n:31, z:'ERHÖHT', x:310, y:250, s:'round' as const, c:2 },
-      { n:21, z:'ERHÖHT', x:420, y:250, s:'round' as const, c:2 },
-      { n:32, z:'ERHÖHT', x:310, y:360, s:'round' as const, c:2 },
-      { n:22, z:'ERHÖHT', x:420, y:360, s:'round' as const, c:2 },
-      { n:33, z:'ERHÖHT', x:310, y:470, s:'round' as const, c:2 },
-      { n:23, z:'ERHÖHT', x:420, y:470, s:'round' as const, c:2 },
+      { n:31, z:'ERHÖHT', x:360, y:245, s:'round' as const, c:2 },
+      { n:21, z:'ERHÖHT', x:465, y:245, s:'round' as const, c:2 },
+      { n:32, z:'ERHÖHT', x:360, y:355, s:'round' as const, c:2 },
+      { n:22, z:'ERHÖHT', x:465, y:355, s:'round' as const, c:2 },
+      { n:33, z:'ERHÖHT', x:360, y:465, s:'round' as const, c:2 },
+      { n:23, z:'ERHÖHT', x:465, y:465, s:'round' as const, c:2 },
       // ── Terrasse: Row 1 (top, near Bambus) ──
-      { n:83,  z:'TERRASSE', x:100, y:100, s:'square' as const, c:2 },
-      { n:73,  z:'TERRASSE', x:250, y:100, s:'square' as const, c:2 },
-      { n:63,  z:'TERRASSE', x:400, y:100, s:'square' as const, c:2 },
-      { n:53,  z:'TERRASSE', x:550, y:100, s:'square' as const, c:2 },
+      { n:83,  z:'TERRASSE', x:175, y:90,  s:'square' as const, c:2 },
+      { n:73,  z:'TERRASSE', x:335, y:90,  s:'square' as const, c:2 },
+      { n:63,  z:'TERRASSE', x:490, y:90,  s:'square' as const, c:2 },
+      { n:53,  z:'TERRASSE', x:640, y:90,  s:'square' as const, c:2 },
       // ── Terrasse: Row 2 (middle) ──
-      { n:102, z:'TERRASSE', x:40,  y:240, s:'square' as const, c:2 },
-      { n:82,  z:'TERRASSE', x:170, y:240, s:'square' as const, c:2 },
-      { n:72,  z:'TERRASSE', x:310, y:240, s:'square' as const, c:2 },
-      { n:62,  z:'TERRASSE', x:450, y:240, s:'square' as const, c:2 },
-      { n:52,  z:'TERRASSE', x:590, y:240, s:'square' as const, c:2 },
+      { n:102, z:'TERRASSE', x:65,  y:230, s:'square' as const, c:2 },
+      { n:82,  z:'TERRASSE', x:210, y:230, s:'square' as const, c:2 },
+      { n:72,  z:'TERRASSE', x:365, y:230, s:'square' as const, c:2 },
+      { n:62,  z:'TERRASSE', x:510, y:230, s:'square' as const, c:2 },
+      { n:52,  z:'TERRASSE', x:660, y:230, s:'square' as const, c:2 },
       // ── Terrasse: Row 3 (bottom) ──
-      { n:101, z:'TERRASSE', x:40,  y:390, s:'square' as const, c:2 },
-      { n:81,  z:'TERRASSE', x:170, y:390, s:'square' as const, c:2 },
-      { n:71,  z:'TERRASSE', x:310, y:390, s:'square' as const, c:2 },
-      { n:61,  z:'TERRASSE', x:450, y:390, s:'square' as const, c:2 },
-      { n:51,  z:'TERRASSE', x:590, y:390, s:'square' as const, c:2 },
+      { n:101, z:'TERRASSE', x:65,  y:380, s:'square' as const, c:2 },
+      { n:81,  z:'TERRASSE', x:210, y:380, s:'square' as const, c:2 },
+      { n:71,  z:'TERRASSE', x:365, y:380, s:'square' as const, c:2 },
+      { n:61,  z:'TERRASSE', x:510, y:380, s:'square' as const, c:2 },
+      { n:51,  z:'TERRASSE', x:660, y:380, s:'square' as const, c:2 },
       // ── Terrasse: Extra (bottom-left) ──
-      { n:92,  z:'TERRASSE', x:170, y:500, s:'square' as const, c:2 },
-      { n:91,  z:'TERRASSE', x:280, y:500, s:'square' as const, c:2 },
+      { n:92,  z:'TERRASSE', x:210, y:490, s:'square' as const, c:2 },
+      { n:91,  z:'TERRASSE', x:330, y:490, s:'square' as const, c:2 },
     ]
     return defs.map(d => ({
       id: `table-${d.n}`, number: d.n, name: `Tisch ${d.n}`,
@@ -663,11 +635,9 @@ export default function AdminFloorPage() {
             <div
               ref={canvasRef}
               style={{ position: 'relative', width: CANVAS_W, height: CANVAS_H,
-                backgroundColor: '#f8f4ee',
-                backgroundImage: 'radial-gradient(circle, #c8b89a 1px, transparent 1px)',
-                backgroundSize: '24px 24px',
-                borderRadius: 20,
-                boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.06)',
+                backgroundColor: '#f8f5f0',
+                border: '1.5px solid #e0d8cc',
+                borderRadius: 16,
                 userSelect: 'none',
               }}
               onPointerMove={editMode ? handleCanvasMove : undefined}
@@ -688,28 +658,30 @@ export default function AdminFloorPage() {
               {floorView === 'restaurant' && (
                 <>
                   {/* EINGANG label */}
-                  <div style={{ position: 'absolute', top: 10, left: 280, textAlign: 'center', zIndex: 2 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 6, color: '#a89070', textTransform: 'uppercase' }}>Eingang</span>
-                    <div style={{ margin: '4px auto 0', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '8px solid #a89070' }} />
+                  <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', textAlign: 'center', zIndex: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 8, color: '#3b1f0a', textTransform: 'uppercase' }}>Eingang</span>
+                    <div style={{ margin: '4px auto 0', width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '9px solid #3b1f0a' }} />
                   </div>
                   {/* +2 STUFEN label */}
-                  <div style={{ position: 'absolute', top: 170, left: 340, zIndex: 2, textAlign: 'center' }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 4, color: '#a89070', textTransform: 'uppercase' }}>+ 2 Stufen</span>
-                    <div style={{ margin: '2px auto 0', width: 60, height: 1.5, backgroundColor: '#a89070' }} />
+                  <div style={{ position: 'absolute', top: 162, left: 370, zIndex: 2, textAlign: 'center' }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 5, color: '#3b1f0a', textTransform: 'uppercase' }}>+ 2 Stufen</span>
+                    <div style={{ margin: '3px auto 0', width: 70, height: 1.5, backgroundColor: '#3b1f0a' }} />
                   </div>
                 </>
               )}
               {floorView === 'terrasse' && (
                 <>
                   {/* BAMBUS label */}
-                  <div style={{ position: 'absolute', top: 50, left: 0, right: 0, textAlign: 'center', zIndex: 2 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 8, color: '#2d6a4f', textTransform: 'uppercase', opacity: 0.5 }}>B a m b u s</span>
-                    <div style={{ margin: '4px 40px 0', borderTop: '2px dotted #a8d9be' }} />
+                  <div style={{ position: 'absolute', top: 48, left: 30, right: 30, textAlign: 'center', zIndex: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 10, color: '#3b1f0a', textTransform: 'uppercase' }}>B A M B U S</span>
+                    <div style={{ margin: '5px 0 0', borderTop: '1.5px dotted #c8c0b0' }} />
                   </div>
-                  {/* PFLANZEN label (vertical, right side) */}
-                  <div style={{ position: 'absolute', top: 80, right: 10, zIndex: 2, writingMode: 'vertical-rl', letterSpacing: 6 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: '#2d6a4f', textTransform: 'uppercase', opacity: 0.5 }}>Pflanzen</span>
-                    <div style={{ position: 'absolute', top: 0, bottom: 0, left: -6, borderLeft: '2px dotted #a8d9be' }} />
+                  {/* PFLANZEN label */}
+                  <div style={{ position: 'absolute', top: 80, right: 12, bottom: 80, zIndex: 2, display: 'flex', alignItems: 'center' }}>
+                    <div style={{ writingMode: 'vertical-rl', letterSpacing: 8, position: 'relative', paddingLeft: 10 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: '#3b1f0a', textTransform: 'uppercase' }}>P F L A N Z E N</span>
+                      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, borderLeft: '1.5px dotted #c8c0b0' }} />
+                    </div>
                   </div>
                 </>
               )}
