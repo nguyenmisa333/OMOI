@@ -39,6 +39,29 @@ export default function HeardisPage() {
           </a>
         </div>
       </object>
+
+      <a
+        href="/heardis-allergene.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          background: '#C4975C',
+          color: '#1a1a1a',
+          padding: '12px 22px',
+          borderRadius: '999px',
+          textDecoration: 'none',
+          fontWeight: 600,
+          fontSize: '15px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          zIndex: 10,
+        }}
+      >
+        Allergene
+      </a>
     </div>
   )
 }
