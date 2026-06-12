@@ -5,9 +5,9 @@ import { sendBookingReminder } from '@/lib/email'
 /**
  * GET /api/cron/reminders
  *
- * Vercel Cron Job — runs every 5 minutes.
- * Finds bookings starting in the next 15–20 minutes
- * that haven't had a reminder sent yet, and sends one.
+ * Vercel Cron Job — runs once daily at 09:00.
+ * Sends one morning reminder for every booking happening today
+ * that hasn't had a reminder sent yet.
  */
 export async function GET(request: NextRequest) {
   // Verify cron secret (Vercel sets this header for cron jobs)
@@ -17,25 +17,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Current time in Europe/Berlin
+    // Current date in Europe/Berlin
     const now = new Date()
     const berlinTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }))
     const todayStr = berlinTime.toISOString().split('T')[0]
 
-    // Calculate time window: 15–20 minutes from now
-    const min15 = new Date(berlinTime.getTime() + 15 * 60 * 1000)
-    const min20 = new Date(berlinTime.getTime() + 20 * 60 * 1000)
-    const timeFrom = `${String(min15.getHours()).padStart(2, '0')}:${String(min15.getMinutes()).padStart(2, '0')}`
-    const timeTo = `${String(min20.getHours()).padStart(2, '0')}:${String(min20.getMinutes()).padStart(2, '0')}`
-
-    // Find confirmed bookings for today, starting in 15-20 min, reminder not sent
+    // Find all bookings for today that haven't had a reminder sent yet
     const { data: bookings, error } = await supabase
       .from('bookings')
       .select('id, bookingCode, guestName, guestEmail, date, startTime, guestCount')
       .eq('date', todayStr)
       .in('status', ['CONFIRMED', 'PENDING'])
-      .gte('startTime', timeFrom)
-      .lt('startTime', timeTo)
       .is('reminderSentAt', null)
       .not('guestEmail', 'is', null)
 

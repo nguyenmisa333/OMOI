@@ -280,10 +280,10 @@ export async function sendBookingReminder(data: ReminderEmailData): Promise<bool
     + '<div style="background:' + card + ';border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(59,31,10,0.10);">'
     + '<div style="height:4px;background:linear-gradient(90deg,#8B6914,' + g + ',#8B6914);"></div>'
     + '<div style="padding:32px 28px 20px;text-align:center;">'
-    + '<div style="width:48px;height:48px;border:2px solid ' + g + ';border-radius:50%;margin:0 auto 16px;line-height:48px;text-align:center;"><span style="font-size:20px;color:' + g + ';font-weight:300;">15</span></div>'
+    + '<div style="width:48px;height:48px;border:2px solid ' + g + ';border-radius:50%;margin:0 auto 16px;line-height:48px;text-align:center;"><span style="font-size:22px;color:' + g + ';font-weight:300;">☀</span></div>'
     + '<p style="font-size:9px;font-weight:700;color:' + sub + ';letter-spacing:3px;text-transform:uppercase;margin:0 0 8px;">Erinnerung</p>'
-    + '<p style="font-size:20px;font-weight:800;color:' + b + ';margin:0;">Ihre Reservierung beginnt bald</p>'
-    + '<p style="font-size:13px;color:' + txt + ';margin:10px 0 0;line-height:1.6;">Liebe/r <strong>' + data.guestName + '</strong>,<br/>in 15 Minuten erwartet Sie Ihr Tisch bei OMOI.</p>'
+    + '<p style="font-size:20px;font-weight:800;color:' + b + ';margin:0;">Heute haben Sie eine Reservierung</p>'
+    + '<p style="font-size:13px;color:' + txt + ';margin:10px 0 0;line-height:1.6;">Liebe/r <strong>' + data.guestName + '</strong>,<br/>heute um <strong>' + data.startTime + ' Uhr</strong> erwartet Sie Ihr Tisch bei OMOI.</p>'
     + '</div>'
     + '<div style="margin:0 28px;border-top:1px solid #e8dfd0;"></div>'
     + '<div style="padding:20px 28px;">'
@@ -313,7 +313,7 @@ export async function sendBookingReminder(data: ReminderEmailData): Promise<bool
       from: '"OMOI · 思い" <' + process.env.NODEMAILER_USER + '>',
       replyTo: process.env.NODEMAILER_USER,
       to: data.guestEmail,
-      subject: 'Erinnerung — Ihre Reservierung bei OMOI beginnt in 15 Minuten',
+      subject: 'Erinnerung — Heute um ' + data.startTime + ' Uhr ist Ihre Reservierung bei OMOI',
       html,
     })
     console.log('[Email] Reminder sent to ' + data.guestEmail + ' — ' + data.bookingCode)
