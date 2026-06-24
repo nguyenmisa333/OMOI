@@ -13,6 +13,20 @@ const nextConfig: NextConfig = {
       { source: "/Stempel/:path*", destination: `${LOYALTY_ORIGIN}/Stempel/:path*` },
     ];
   },
+  async headers() {
+    // Không cache trang /Stempel ở Vercel/CDN: nội dung do app loyalty (Render)
+    // quản lý. Nếu cache, mỗi lần loyalty đổi build sẽ phục vụ HTML cũ (logo vỡ...).
+    return [
+      {
+        source: "/Stempel/:path*",
+        headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }],
+      },
+      {
+        source: "/Stempel",
+        headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
