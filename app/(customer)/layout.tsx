@@ -6,9 +6,10 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import BottomNav from '@/components/shared/BottomNav'
 
-const navLinks = [
+const navLinks: { href: string; icon: string; label: string; external?: boolean }[] = [
   { href: '/', icon: 'home', label: 'Startseite' },
   { href: '/booking', icon: 'event_seat', label: 'Reservieren' },
+  { href: '/Stempel', icon: 'loyalty', label: 'Stempelkarte', external: true },
   { href: '/kontakt', icon: 'call', label: 'Kontakt' },
   { href: '/ueber-uns', icon: 'info', label: 'Über uns' },
   { href: '/impressum', icon: 'gavel', label: 'Impressum' },
@@ -100,21 +101,24 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
             <nav className="hidden md:flex items-center gap-1">
               {navLinks.slice(0, 5).map((item) => {
                 const isPageActive = item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href)
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      isPageActive
-                        ? 'bg-amber-100 text-amber-900'
-                        : isHome && !scrolled
-                          ? 'text-white/80 hover:text-white hover:bg-white/10'
-                          : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
-                    }`}
-                  >
+                const className = `flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  isPageActive
+                    ? 'bg-amber-100 text-amber-900'
+                    : isHome && !scrolled
+                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
+                }`
+                const inner = (
+                  <>
                     <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
                     {item.label}
-                  </Link>
+                  </>
+                )
+                // Link ngoài (vd /Stempel được proxy sang Render) cần full-page nav.
+                return item.external ? (
+                  <a key={item.label} href={item.href} className={className}>{inner}</a>
+                ) : (
+                  <Link key={item.label} href={item.href} className={className}>{inner}</Link>
                 )
               })}
             </nav>
@@ -133,17 +137,13 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
             <nav className="flex flex-col p-3 gap-1">
               {navLinks.map((item) => {
                 const isActive = item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href)
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all active:scale-[0.98] ${
-                      isActive
-                        ? 'bg-amber-100 text-amber-900'
-                        : 'text-stone-600 hover:bg-stone-100'
-                    }`}
-                  >
+                const className = `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all active:scale-[0.98] ${
+                  isActive
+                    ? 'bg-amber-100 text-amber-900'
+                    : 'text-stone-600 hover:bg-stone-100'
+                }`
+                const inner = (
+                  <>
                     <span
                       className="material-symbols-outlined text-[20px]"
                       style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
@@ -151,7 +151,12 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                       {item.icon}
                     </span>
                     {item.label}
-                  </Link>
+                  </>
+                )
+                return item.external ? (
+                  <a key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className={className}>{inner}</a>
+                ) : (
+                  <Link key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className={className}>{inner}</Link>
                 )
               })}
             </nav>
