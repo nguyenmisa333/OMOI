@@ -26,6 +26,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/images/omoi-avatar.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#3b1f0a" />
+        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}` }} />
         {/* #13 Analytics — replace G-XXXXXXXXXX with your GA4 ID */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX" />
         <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');` }} />
