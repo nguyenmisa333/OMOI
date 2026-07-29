@@ -36,6 +36,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       .catch(() => {})
   }, [])
 
+  // Swap manifest → admin-specific (start_url: /admin) khi ở trang admin
+  // iOS Safari đọc manifest lúc user nhấn "Thêm vào màn hình chính"
+  useEffect(() => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')
+    if (link) link.href = '/manifest-admin.json'
+    return () => { if (link) link.href = '/manifest.json' }
+  }, [])
+
   // Close menu on route change
   useEffect(() => {
     setMenuOpen(false)
