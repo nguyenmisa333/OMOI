@@ -7,9 +7,11 @@ import AdminShell from './AdminShell'
 // vẫn đọc manifest gốc (start_url: /) → cài admin lại ra trang chủ.
 // Metadata ở segment con ghi đè segment cha, nên chỉ cần khai lại `manifest` ở đây.
 export const metadata: Metadata = {
-  title: 'O·MO·I Admin',
+  title: 'O·MO·I Reservierung Admin',
   manifest: '/manifest-admin.json',
-  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'OMOI Admin' },
+  // Icon riêng cho admin — iOS lấy apple-touch-icon (không đọc icons trong manifest).
+  icons: { icon: '/images/icon-admin-192.png', apple: '/images/icon-admin-180.png' },
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Reservierung admin' },
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
