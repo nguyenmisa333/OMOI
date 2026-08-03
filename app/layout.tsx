@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,12 +6,29 @@ export const metadata: Metadata = {
   description: "O·MO·I — Japanisch inspiriertes Brunch-Café in Stuttgart. Ceremonial Matcha, handgefertigte Onigirazu und Artisan Brunch. Jetzt Tisch reservieren.",
   keywords: "OMOI, Cafe, Matcha, Onigirazu, Brunch, Stuttgart, Reservierung",
   metadataBase: new URL("https://omoi.help"),
+  // Manifest + icons qua metadata (KHÔNG hardcode trong <head>): segment con
+  // app/(admin)/layout.tsx cần ghi đè `manifest` để iOS cài đúng app admin.
+  // Hardcode trong <head> sẽ tạo 2 <link rel="manifest">, browser dùng cái đầu.
+  manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/favicon.ico", sizes: "32x32" }],
+    apple: "/images/icon-180.png",
+  },
+  // Next tự phát <meta name="mobile-web-app-capable"> từ appleWebApp.capable —
+  // không khai thêm trong `other`, sẽ ra thẻ trùng.
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "O·MO·I" },
   openGraph: {
     title: "O·MO·I | Brunch · Matcha · Onigirazu — Stuttgart",
     description: "Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Ceremonial Matcha & Signature Onigirazu.",
     locale: "de_DE",
     siteName: "O·MO·I",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#3b1f0a",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -22,10 +39,6 @@ export default function RootLayout({
   return (
     <html lang="de" className="h-full antialiased">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/images/omoi-avatar.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#3b1f0a" />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}` }} />
         {/* #13 Analytics — replace G-XXXXXXXXXX with your GA4 ID */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX" />
