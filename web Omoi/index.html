@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>O·MO·I | Brunch · Matcha · Onigirazu — Stuttgart</title>
+<meta name="description" content="O·MO·I — Japanisch inspiriertes Brunch-Café in Stuttgart. Ceremonial Matcha, handgefertigte Onigirazu und Artisan Brunch."/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar" id="navbar">
+  <div class="navbar__desktop-nav">
+    <a href="#about">Über uns</a>
+    <a href="#menu">Speisekarte</a>
+    <a href="#kontakt">Kontakt</a>
+  </div>
+  <div class="navbar__logo"><img src="images/logo.png" alt="O·MO·I" class="navbar__logo-img"/></div>
+  <button class="navbar__hamburger material-symbols-outlined" id="menu-open">menu</button>
+  <div class="navbar__desktop-cta"><button onclick="location.href='#reservieren'">Tisch reservieren</button></div>
+</header>
+
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu__close material-symbols-outlined" id="menu-close">close</button>
+  <a href="#about" class="mobile-menu__link">Über uns</a>
+  <a href="#menu" class="mobile-menu__link">Speisekarte</a>
+  <a href="#kontakt" class="mobile-menu__link">Kontakt</a>
+  <button class="mobile-menu__cta" onclick="location.href='#reservieren'">Tisch reservieren</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero__bg">
+    <img src="images/hero.jpg" alt="O·MO·I Café Interior"/>
+    <div class="hero__overlay"></div>
+  </div>
+  <div class="hero__content fade-up">
+    <img src="images/logo.png" alt="O·MO·I" class="hero__logo-img"/>
+    <p class="hero__tagline">Brunch · Matcha · Onigirazu</p>
+    <p class="hero__subline">Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich.</p>
+    <div class="hero__buttons">
+      <a href="OMOI_Karte_Selbstzahler.pdf" target="_blank" class="btn-primary">Speisekarte ansehen</a>
+      <a href="#reservieren" class="btn-outline">Tisch reservieren</a>
+    </div>
+  </div>
+  <span class="hero__scroll material-symbols-outlined">keyboard_arrow_down</span>
+</section>
+
+<!-- ABOUT -->
+<section class="about fade-up" id="about">
+  <div class="about__header">
+    <h2 class="about__title">Willkommen bei O·MO·I</h2>
+    <div class="about__dot"></div>
+    <p class="about__text">O·MO·I bedeutet Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Wir servieren handverlesenen Ceremonial Grade Matcha, kunstvoll zubereitete Signature Onigirazu und Bowls – Crafted with Heart, mitten in Stuttgart.</p>
+  </div>
+  <div class="about__cards">
+    <div class="about-card">
+      <div class="about-card__image"><img src="images/IMG_2435.jpg" alt="Ceremonial Matcha bei O·MO·I"/></div>
+      <div class="about-card__body">
+        <h3 class="about-card__title">Ceremonial Matcha</h3>
+        <p class="about-card__desc">Traditionell zubereitet aus den feinsten Teeblättern Japans.</p>
+      </div>
+    </div>
+    <div class="about-card">
+      <div class="about-card__image"><img src="images/IMG_2437.JPG" alt="Signature Onigirazu bei O·MO·I"/></div>
+      <div class="about-card__body">
+        <h3 class="about-card__title">Signature Onigirazu</h3>
+        <p class="about-card__desc">Unser handgefertigtes Sushi-Sandwich, neu interpretiert.</p>
+      </div>
+    </div>
+    <div class="about-card">
+      <div class="about-card__image"><img src="images/IMG_2438.JPG" alt="Artisan Brunch bei O·MO·I"/></div>
+      <div class="about-card__body">
+        <h3 class="about-card__title">Artisan Brunch</h3>
+        <p class="about-card__desc">Matcha Tiramisu, Onigirazu & Bowl – alles auf einem Tisch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu-section fade-up" id="menu">
+  <div class="menu-section__header">
+    <h2 class="menu-section__title">Unsere Speisekarte</h2>
+    <p class="menu-section__sub">Von Matcha bis Onigirazu — mit Liebe zubereitet</p>
+  </div>
+
+  <!-- MOBILE: Accordion -->
+  <div class="menu-accordion" id="menu-accordion"></div>
+
+  <!-- DESKTOP: Tabs -->
+  <div class="menu-tabs" id="menu-tabs">
+    <div class="tab-bar" id="tab-bar"></div>
+    <div id="tab-contents"></div>
+  </div>
+
+  <div class="menu-link"><a href="speisekarte.pdf" target="_blank">Vollständige Speisekarte <span class="material-symbols-outlined" style="font-size:16px">arrow_forward</span></a></div>
+</section>
+
+<!-- RESERVATION -->
+<section class="reservation fade-up" id="reservieren">
+  <h2 class="reservation__title">Reservieren Sie Ihren Tisch</h2>
+  <p class="reservation__text">Sichern Sie sich Ihren Platz in unserer Zen-Oase.</p>
+  <a href="#" class="reservation__btn">Jetzt reservieren</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" id="kontakt">
+  <div class="footer__logo"><img src="images/logo.png" alt="O·MO·I" class="footer__logo-img"/></div>
+  <div class="footer__blocks">
+    <div class="footer__block">
+      <p class="footer__block-title">Öffnungszeiten</p>
+      <p>Dienstag – Donnerstag: 12:00 – 21:00</p>
+      <p>Freitag – Samstag: 12:00 – 22:00</p>
+      <p>Sonntag: 12:00 – 20:00</p>
+      <p>Montag: Ruhetag</p>
+    </div>
+    <div class="footer__block">
+      <p class="footer__block-title">O·MO·I</p>
+      <p style="font-style:italic;font-size:13px;margin-bottom:12px">"Gefühl, Gedanke, Sehnsucht und Liebe"</p>
+      <div class="footer__links">
+        <a href="https://instagram.com/o.mo.i" target="_blank">@o.mo.i</a>
+      </div>
+    </div>
+    <div class="footer__block">
+      <p class="footer__block-title">Kontakt</p>
+      <p>Hauptstätter Straße 57</p>
+      <p>70178 Stuttgart-Mitte</p>
+      <p><a href="mailto:hello@o-mo-i.de" style="color:var(--brand-gold)">hello@o-mo-i.de</a></p>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <p class="footer__copy">© 2026 O·MO·I — Crafted with Heart in Stuttgart</p>
+    <nav class="footer__legal">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="menu-data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
