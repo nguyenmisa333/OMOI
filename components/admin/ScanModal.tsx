@@ -82,6 +82,13 @@ export default function ScanModal({ onClose }: Props) {
   // Stop camera on unmount
   useEffect(() => () => stopScanner(), [stopScanner])
 
+  // Lock background scroll while modal is open (prevents scroll-chaining on mobile)
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
   // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') { stopScanner(); onClose() } }
@@ -192,9 +199,9 @@ export default function ScanModal({ onClose }: Props) {
   const tables = booking?.assignedTables?.map(a => a.table) || (booking?.table ? [booking.table] : [])
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto overscroll-contain"
       onClick={() => { stopScanner(); onClose() }}>
-      <div className="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col"
+      <div className="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl overflow-hidden shadow-2xl max-h-[92dvh] flex flex-col"
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
@@ -214,7 +221,7 @@ export default function ScanModal({ onClose }: Props) {
           </button>
         </div>
 
-        <div className="overflow-y-auto flex-1 p-4 space-y-4">
+        <div className="overflow-y-auto overscroll-contain flex-1 p-4 space-y-4">
 
           {/* Camera area */}
           <div className="relative aspect-video bg-[#1a1512] rounded-2xl overflow-hidden">
