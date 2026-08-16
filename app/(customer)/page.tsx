@@ -59,6 +59,60 @@ const MENU_DATA_FALLBACK = [
     note: "Sushireis, Salat, Avocado, Gurke, Kim Chi, Nori, Edamame"
   },
   {
+    id: "lunch", label: "Lunch",
+    items: [
+      { name: "3 Stücke + Iced Drink", desc: "DI – SA · 12 – 15 UHR", price: "12,90" },
+      { name: "3 Stücke + Glas Wein", desc: "DI – SA · 12 – 15 UHR", price: "13,90" },
+    ],
+    note: "Drei Stücke, ein Glas. Mittags aus der Hand. Alle Sorten frei mischbar · Premium +2 pro Stück"
+  },
+  {
+    id: "hiraki", label: "Hiraki 開き",
+    items: [
+      { name: "Tuna", desc: "Goldfire", price: "3,90" },
+      { name: "Salmon", desc: "Spicy Mayo", price: "3,90" },
+      { name: "Chicken", desc: "Teriyaki", price: "3,90" },
+      { name: "Kani", desc: "Mentaiko-Mayo", price: "3,90" },
+      { name: "Mushroom 🌱", desc: "Shoyu · Miso-Butter · Vegan", price: "3,90" },
+      { name: "Tamago", desc: "Smoked Salt", price: "3,90" },
+      { name: "Hotate 👑", desc: "Yuzu-Butter", price: "6,90" },
+      { name: "Unagi 👑", desc: "Unagi-Glaze", price: "6,90" },
+      { name: "Ember Beef 👑", desc: "Entrecôte · Pepper Glaze", price: "6,90" },
+    ],
+    note: "Pro Stück 3,90 · Premium 6,90 | Sets: 3x 9,90 · 6x 18,90 · 9x 35,90"
+  },
+  {
+    id: "hiraki-week", label: "Hiraki Week",
+    items: [
+      { name: "1 Stück + Iced Drink", desc: "Täglich · Ganztags · bis 16.08", price: "7,90" },
+      { name: "2 Stücke + Glas Wein", desc: "Täglich · Ganztags · bis 16.08", price: "9,90" },
+    ],
+    note: "Sorten: Chicken · Mushroom · Tamago · Kani"
+  },
+  {
+    id: "tteok", label: "Butter Tteok",
+    items: [
+      { name: "Solo", desc: "1 Stück · Vani oder Schoko · Glutenfrei", price: "1,50" },
+      { name: "5er", desc: "5 Stücke · Vani oder Schoko · Glutenfrei", price: "6,50" },
+      { name: "10er", desc: "10 Stücke · Vani oder Schoko · Glutenfrei", price: "12,00" },
+      { name: "Tiramisu Soße", desc: "Perfekt mit Schoko Tteok", price: "+2,00" },
+      { name: "Pistazien Matcha Soße", desc: "Perfekt mit Vani Tteok", price: "+2,00" },
+    ],
+    note: "Warm. Buttrig. Auf die Hand. Frisch vom Griddle"
+  },
+  {
+    id: "crepes", label: "Japanese Crêpes",
+    items: [
+      { name: "Matcha", desc: "Matcha-Creme · Erdbeeren · Blaubeeren", price: "7,50" },
+      { name: "Matcha Brûlée", desc: "Knackig karamellisiert · Sesam", price: "7,00" },
+      { name: "Crêpes Choco", desc: "Schoko · Banane · Beeren", price: "7,00" },
+      { name: "crêpes choco", desc: "Schoko · Banane · Beeren", price: "6,50" },
+      { name: "matcha brûlée", desc: "Knackig karamellisiert · Sesam", price: "6,50" },
+      { name: "matcha", desc: "Matcha-Creme · Erdbeeren · Blaubeeren", price: "6,50" },
+    ],
+    note: "Drei Sorten. Gerollt. Auf die Hand."
+  },
+  {
     id: "desserts", label: "Signature Desserts",
     items: [
       { name: "Matcha Tiramisu", price: "6,50", desc: "a, c, g" },
@@ -137,6 +191,11 @@ const KUCHEN_SPECIALS: KuchenItem[] = [
 const TAB_GROUPS = [
   { label: "Coffee", cats: ["coffee"] },
   { label: "Matcha", cats: ["matcha"] },
+  { label: "Lunch", cats: ["lunch"] },
+  { label: "Hiraki", cats: ["hiraki"] },
+  { label: "Hiraki Week", cats: ["hiraki-week"] },
+  { label: "Butter Tteok", cats: ["tteok"] },
+  { label: "Crêpes", cats: ["crepes"] },
   { label: "Onigirazu", cats: ["onigirazu"] },
   { label: "Bowls", cats: ["bowls"] },
   { label: "Desserts", cats: ["desserts"] },
