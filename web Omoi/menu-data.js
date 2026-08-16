@@ -93,6 +93,11 @@ const MENU_DATA = [
   },
   {
     id: "hiraki", label: "Hiraki 開き",
+    sets: [
+      { name: "3x Rolls", price: "9,90" },
+      { name: "6x Rolls", price: "18,90" },
+      { name: "9x Rolls", price: "35,90" },
+    ],
     items: [
       { name: "Tuna", desc: "Goldfire", price: "3,90" },
       { name: "Salmon", desc: "Spicy Mayo", price: "3,90" },
@@ -100,11 +105,19 @@ const MENU_DATA = [
       { name: "Kani", desc: "Mentaiko-Mayo", price: "3,90" },
       { name: "Mushroom 🌱", desc: "Shoyu · Miso-Butter · Vegan", price: "3,90" },
       { name: "Tamago", desc: "Smoked Salt", price: "3,90" },
-      { name: "Hotate", desc: "Yuzu-Butter", price: "6,90", premium: true },
-      { name: "Unagi", desc: "Unagi-Glaze", price: "6,90", premium: true },
-      { name: "Ember Beef", desc: "Entrecôte · Pepper", price: "6,90", premium: true },
+      { name: "Hotate 👑", desc: "Yuzu-Butter", price: "6,90", premium: true },
+      { name: "Unagi 👑", desc: "Unagi-Glaze", price: "6,90", premium: true },
+      { name: "Ember Beef 👑", desc: "Entrecôte · Pepper Glaze", price: "6,90", premium: true },
     ],
-    note: "Neun offene Stücke — nimm drei, nimm sechs. Aus der Hand, in zwei Bissen."
+    note: "Neun offene Stücke — nimm drei, nimm sechs. Jedes mit eigenem Finish — aus der Hand, in zwei Bissen. Pro Stück 3,90 · Premium 6,90"
+  },
+  {
+    id: "hiraki-week", label: "Hiraki Week",
+    items: [
+      { name: "1 Stück + Iced Drink", desc: "Täglich · Ganztags · bis 16.08", price: "7,90" },
+      { name: "2 Stücke + Glas Wein", desc: "Täglich · Ganztags · bis 16.08", price: "9,90" },
+    ],
+    note: "Sorten: Chicken · Mushroom · Tamago · Kani"
   },
   {
     id: "tteok", label: "Butter Tteok",
@@ -127,6 +140,9 @@ const MENU_DATA = [
       { name: "Matcha", desc: "Matcha-Creme · Erdbeeren · Blaubeeren", price: "7,50" },
       { name: "Matcha Brûlée", desc: "Knackig karamellisiert · Sesam", price: "7,00" },
       { name: "Crêpes Choco", desc: "Schoko · Banane · Beeren", price: "7,00" },
+      { name: "crêpes choco", desc: "Schoko · Banane · Beeren", price: "6,50" },
+      { name: "matcha brûlée", desc: "Knackig karamellisiert · Sesam", price: "6,50" },
+      { name: "matcha", desc: "Matcha-Creme · Erdbeeren · Blaubeeren", price: "6,50" },
     ],
     note: "Drei Sorten. Gerollt. Auf die Hand."
   },
@@ -196,6 +212,7 @@ const TAB_GROUPS = [
   { label: "Bubbles & Wines", categories: ["bubbles"] },
   { label: "Lunch", categories: ["lunch"] },
   { label: "Hiraki", categories: ["hiraki"] },
+  { label: "Hiraki Week", categories: ["hiraki-week"] },
   { label: "Butter Tteok", categories: ["tteok"] },
   { label: "Crêpes", categories: ["crepes"] },
   { label: "Onigirazu", categories: ["onigirazu", "boosts"] },
