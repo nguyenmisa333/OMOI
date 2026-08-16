@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import jsQR from 'jsqr'
 
 type BarcodeDetectorLike = {
   detect: (source: CanvasImageSource) => Promise<Array<{ rawValue: string }>>
@@ -58,6 +59,7 @@ interface Props { onClose: () => void }
 
 export default function ScanModal({ onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const scanActiveRef = useRef(false)
 
@@ -110,11 +112,12 @@ export default function ScanModal({ onClose }: Props) {
   async function startScanner() {
     setError('')
     setBooking(null)
-    const Detector = getBarcodeDetector()
-    if (!Detector) {
-      setError('QR-Scan nicht unterstützt — bitte Code manuell eingeben.')
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError('Kamera nicht verfügbar (evtl. kein HTTPS) — bitte Code manuell eingeben.')
       return
     }
+
     try {
       stopScanner()
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
@@ -123,20 +126,49 @@ export default function ScanModal({ onClose }: Props) {
       setScanning(true)
       const video = videoRef.current!
       video.srcObject = stream
+      video.setAttribute('playsinline', 'true')
       await video.play()
-      const detector = new Detector({ formats: ['qr_code'] })
+
+      // Prefer native BarcodeDetector when available, otherwise fall back to jsQR.
+      const Detector = getBarcodeDetector()
+      const detector = Detector ? new Detector({ formats: ['qr_code'] }) : null
+
       const scanFrame = async () => {
-        if (!scanActiveRef.current || !videoRef.current) return
+        const video = videoRef.current
+        if (!scanActiveRef.current || !video) return
         try {
-          if (videoRef.current.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-            const codes = await detector.detect(videoRef.current)
-            if (codes[0]?.rawValue) { await lookupBooking(codes[0].rawValue); return }
+          if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            if (detector) {
+              const codes = await detector.detect(video)
+              if (codes[0]?.rawValue) { await lookupBooking(codes[0].rawValue); return }
+            } else {
+              const w = video.videoWidth, h = video.videoHeight
+              if (w && h) {
+                let canvas = canvasRef.current
+                if (!canvas) { canvas = document.createElement('canvas'); canvasRef.current = canvas }
+                canvas.width = w
+                canvas.height = h
+                const ctx = canvas.getContext('2d', { willReadFrequently: true })
+                if (ctx) {
+                  ctx.drawImage(video, 0, 0, w, h)
+                  const img = ctx.getImageData(0, 0, w, h)
+                  const result = jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' })
+                  if (result?.data) { await lookupBooking(result.data); return }
+                }
+              }
+            }
           }
         } catch { /* ignore frame errors */ }
         if (scanActiveRef.current) window.setTimeout(scanFrame, 250)
       }
       scanFrame()
-    } catch { stopScanner(); setError('Kamera konnte nicht geöffnet werden.') }
+    } catch (e) {
+      stopScanner()
+      const name = (e as { name?: string })?.name
+      if (name === 'NotAllowedError') setError('Kamerazugriff verweigert — bitte in den Browsereinstellungen erlauben.')
+      else if (name === 'NotFoundError') setError('Keine Kamera gefunden.')
+      else setError('Kamera konnte nicht geöffnet werden.')
+    }
   }
 
   async function updateStatus(status: string) {
