@@ -6,200 +6,236 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 
 // ─── Fallback Menu Data ────────────────────────────────────────
 const MENU_DATA_FALLBACK = [
+  // ══════════ 1 · ESSEN ══════════
   {
-    id: "coffee", label: "Coffee",
+    id: "hiraki", label: "Hiraki 開き",
     items: [
-      { name: "Espresso", price: "2,20" },
-      { name: "Espresso Macchiato", price: "2,90" },
-      { name: "Cappuccino", price: "3,90" },
-      { name: "Iced Latte", price: "3,90" },
-      { name: "Flat White", price: "3,90" },
-      { name: "Americano", price: "3,30" },
-      { name: "Heiße Schokolade", price: "4,50" },
-      { name: "Latte Macchiato", price: "4,90" },
+      { name: "Spicy Salmon", desc: "Spicy Mayo · Togarashi", price: "3,90" },
+      { name: "Tuna", desc: "Goldfire", price: "3,90" },
+      { name: "Tempura Shrimp", desc: "Yuzu-Kosho-Mayo", price: "3,90" },
+      { name: "Chicken", desc: "Teriyaki", price: "3,90" },
+      { name: "Smash Avocado 🌱", desc: "Shoyu Glaze · Miso-Butter", price: "3,90" },
+      { name: "Crab ⭐", desc: "Mentaiko-Mayo · Tobiko", price: "3,90" },
+      { name: "Mushroom 🌱", desc: "Shoyu Glaze · Miso-Butter", price: "3,90" },
+      { name: "Omelette", desc: "Furikake · Smoked Salt", price: "3,90" },
+      { name: "Crispy Tofu 🌱", desc: "Shoyu Glaze · Miso-Butter", price: "3,90" },
+      { name: "Scallop 👑", desc: "Jakobsmuschel · Yuzu-Butter", price: "6,90" },
+      { name: "BBQ Eel 👑", desc: "gegrillt · Sansho", price: "6,90" },
+      { name: "Ember Beef 👑 ⭐", desc: "Entrecôte · Pepper Glaze", price: "6,90" },
+      { name: "Chef's Choice ⭐", desc: "Tagesempfehlung des Küchenchefs", price: "3,90" },
     ],
-    note: "Standard: Kuhmilch | Alternative: Hafermilch, Kokosmilch"
+    note: "Set: 3 St 9,9 € · 5 St 15,9 € · 9 St 25,9 € (Premium +2 €/Set) | Einzeln 3,9 € · Premium 6,9 €. Jedes Hiraki mit eigenem Finish, in zwei Bissen."
   },
   {
-    id: "matcha", label: "Iced Matcha & Hojicha Ceremonial",
+    id: "small-bites", label: "Small Bites",
     items: [
-      { name: "Velvet Matcha + Tiramisu", price: "9,00" },
-      { name: "Matcha Classic HOT", price: "4,50" },
-      { name: "Hojicha HOT", price: "5,20" },
-      { name: "Matcha Classic", price: "4,50" },
-      { name: "Strawberry Matcha", price: "5,50" },
-      { name: "Mango Matcha", price: "5,50" },
-      { name: "Misu Matcha Cloud", price: "7,00" },
-      { name: "Yuzu Matcha Cloud", price: "7,00" },
+      { name: "Edamame", price: "3,90" },
+      { name: "Kimchi", price: "3,90" },
+      { name: "Gyoza", price: "5,00" },
+      { name: "Teriyaki Chicken", price: "5,00" },
+      { name: "Tempura Shrimp", price: "5,00" },
+      { name: "All-Bites", desc: "alle fünf", price: "18,00" },
     ],
-    note: "Standard: Kuhmilch & Agaven-Sirup | Alternative: Hafermilch, Kokosmilch"
   },
   {
     id: "onigirazu", label: "O·MO·I Signature Onigirazu",
     items: [
-      { name: "Hot Red Tuna", desc: "gekochter Thunfisch, Spicy-Mayo", price: "8,50" },
-      { name: "Okinawa Classic", desc: "Frühstücksfleisch, Spicy-Mayo", price: "5,50" },
-      { name: "Teriyaki Grilled Dry-Aged Salmon", desc: "Lachs-Steak, Togarashi", price: "9,50" },
-      { name: "Kani-Kama", desc: "Surimi Mix, Mentaiko-Mayo", price: "6,50" },
-      { name: "Slow Grill Chicken", desc: "Hühnerbrustfilet, Teriyaki-Soße", price: "7,50" },
-      { name: "Super Mario", desc: "Buchenpilze, Kräuterseitlinge, Miso-Butter", price: "7,00" },
+      { name: "Signature", desc: "Lachstatar · Tamago-Ei · Avocado", price: "7,00" },
+      { name: "Hot Red Tuna", desc: "gekochter Thunfisch · Spicy Mayo", price: "8,50" },
+      { name: "Okinawa Classic", desc: "Frühstücksfleisch · Spicy Mayo", price: "5,50" },
+      { name: "Slow Grill Chicken", desc: "Hühnerbrustfilet · Tomaten · Teriyaki-Soße", price: "7,50" },
+      { name: "Teriyaki Grilled Dry-Aged Salmon", desc: "Lachs-Steak · Togarashi · O·MO·I Goldfire", price: "9,50" },
+      { name: "Kani-Kama", desc: "Surimi Mix · Mentaiko Mayo", price: "6,50" },
+      { name: "Super Mario 🌱 ⭐", desc: "Buchenpilze · Kräuterseitlinge · Shoyu Glaze · Miso-Butter", price: "7,00" },
     ],
-    note: "Base 7,0 € — Nori, Sushireis, Salat, Lachstatar, Tamago-Ei, Avocado"
+    note: "Basis: Nori · Sushireis mit Sesam · Salat · Gurke · Sushireis · Nori"
+  },
+  {
+    id: "boosts", label: "House Boosts · Extra",
+    items: [
+      { name: "Spicy Mayo", price: "+0,80" },
+      { name: "Shoyu Glaze & Miso-Butter", price: "+1,00" },
+      { name: "Mentaiko Mayo", price: "+1,50" },
+      { name: "O·MO·I Goldfire", price: "+1,50" },
+      { name: "Lime-Peanut-Butter", price: "+2,50" },
+      { name: "All-in Sauces", price: "+5,00" },
+    ],
   },
   {
     id: "bowls", label: "O·MO·I Bowls",
     items: [
-      { name: "Salmon Rubies", desc: "Lachs, Kirschtomaten, Spicy-Mayo", price: "11,90" },
-      { name: "Midori Otah Veggie 🌱", desc: "Buchenpilze, Shoyu Glaze", price: "10,90" },
-      { name: "Fired Tuna", desc: "Sous-Vide-Thunfisch, Goldfire", price: "13,90" },
-      { name: "Crispy O·MO·I", desc: "gegrilltes Hähnchen, Teriyaki", price: "12,90" },
-      { name: "Beef Embers", desc: "Entrecôte, Pepper-Sauce", price: "15,90" },
-      { name: "Tofu Aoi 🌱", desc: "knuspriger Tofu, Shoyu Glaze", price: "10,90" },
+      { name: "Crispy O·MO·I", desc: "Gegrilltes Hühnerbrustfilet · Teriyaki-Soße", price: "12,90" },
+      { name: "Salmon Rubies", desc: "Lachs · Spicy-Mayo", price: "11,90" },
+      { name: "Beef Embers ⭐", desc: "Entrecôte · Pepper-Sauce", price: "15,90" },
+      { name: "Fired Tuna", desc: "Langsam gegarter Thunfisch · O·MO·I Goldfire", price: "13,90" },
+      { name: "Midori Otah Veggie 🌱", desc: "Buchenpilze · Kräuterseitlinge · Shoyu Glaze", price: "10,90" },
+      { name: "Tori Crunch – no rice ⭐", desc: "gezupftes Hähnchen · Dunkelglasnudeln · Lime-Peanut-Butter", price: "13,90" },
+      { name: "Tofu Aoi 🌱", desc: "Knuspriger Tofu · Shoyu Glaze", price: "10,90" },
+      { name: "Dancing Snake ⭐⭐", desc: "gegrillter Süßwasser-Aal · Unagi Sauce", price: "17,90" },
     ],
-    note: "Sushireis, Salat, Avocado, Gurke, Kim Chi, Nori, Edamame"
+    note: "Basis: Sushireis · Salat · Avocado · Gurke · Kimchi · Nori · Kirschtomaten · Edamame · Mais"
   },
   {
-    id: "lunch", label: "Lunch",
+    id: "extra-protein", label: "Extra Protein",
     items: [
-      { name: "3 Stücke + Iced Drink", desc: "DI – SA · 12 – 15 UHR", price: "12,90" },
-      { name: "3 Stücke + Glas Wein", desc: "DI – SA · 12 – 15 UHR", price: "13,90" },
+      { name: "Knuspriger Tofu", price: "+3,50" },
+      { name: "Lachs", price: "+5,50" },
+      { name: "Thunfisch", price: "+6,50" },
+      { name: "Entrecôte", price: "+9,50" },
     ],
-    note: "Drei Stücke, ein Glas. Mittags aus der Hand. Alle Sorten frei mischbar · Premium +2 pro Stück"
   },
   {
-    id: "hiraki", label: "Hiraki 開き",
+    id: "yakumi", label: "Yakumi-Topping",
     items: [
-      { name: "Tuna", desc: "Goldfire", price: "3,90" },
-      { name: "Salmon", desc: "Spicy Mayo", price: "3,90" },
-      { name: "Chicken", desc: "Teriyaki", price: "3,90" },
-      { name: "Kani", desc: "Mentaiko-Mayo", price: "3,90" },
-      { name: "Mushroom 🌱", desc: "Shoyu · Miso-Butter · Vegan", price: "3,90" },
-      { name: "Tamago", desc: "Smoked Salt", price: "3,90" },
-      { name: "Hotate 👑", desc: "Yuzu-Butter", price: "6,90" },
-      { name: "Unagi 👑", desc: "Unagi-Glaze", price: "6,90" },
-      { name: "Ember Beef 👑", desc: "Entrecôte · Pepper Glaze", price: "6,90" },
+      { name: "Edamame", price: "+2,50" },
+      { name: "Kimchi", price: "+2,50" },
+      { name: "Avocado", price: "+3,50" },
+      { name: "Nori-Streifen", price: "+1,50" },
     ],
-    note: "Pro Stück 3,90 · Premium 6,90 | Sets: 3x 9,90 · 6x 18,90 · 9x 35,90"
   },
-  {
-    id: "hiraki-week", label: "Hiraki Week",
-    items: [
-      { name: "1 Stück + Iced Drink", desc: "Täglich · Ganztags · bis 16.08", price: "7,90" },
-      { name: "2 Stücke + Glas Wein", desc: "Täglich · Ganztags · bis 16.08", price: "9,90" },
-    ],
-    note: "Sorten: Chicken · Mushroom · Tamago · Kani"
-  },
+
+  // ══════════ 2 · SÜSSES ══════════
   {
     id: "tteok", label: "Butter Tteok",
     items: [
-      { name: "Solo", desc: "1 Stück · Vani oder Schoko · Glutenfrei", price: "1,50" },
-      { name: "5er", desc: "5 Stücke · Vani oder Schoko · Glutenfrei", price: "6,50" },
-      { name: "10er", desc: "10 Stücke · Vani oder Schoko · Glutenfrei", price: "12,00" },
-      { name: "Tiramisu Soße", desc: "Perfekt mit Schoko Tteok", price: "+2,00" },
-      { name: "Pistazien Matcha Soße", desc: "Perfekt mit Vani Tteok", price: "+2,00" },
+      { name: "Solo", price: "1,50" },
+      { name: "5er", desc: "inkl. 1 Sauce", price: "6,50" },
+      { name: "10er", desc: "inkl. 2 Saucen", price: "12,00" },
+      { name: "Weitere Sauce", price: "+2,00" },
     ],
-    note: "Warm. Buttrig. Auf die Hand. Frisch vom Griddle"
+    note: "Warm, buttrig, auf die Hand. Tteok: Vanille · Schokolade | Saucen: Tiramisu Cream · Matcha Cream"
   },
   {
-    id: "crepes", label: "Japanese Crêpes",
+    id: "crepes", label: "Crêpes",
     items: [
-      { name: "Matcha", desc: "Matcha-Creme · Erdbeeren · Blaubeeren", price: "7,50" },
-      { name: "Matcha Brûlée", desc: "Knackig karamellisiert · Sesam", price: "7,00" },
-      { name: "Crêpes Choco", desc: "Schoko · Banane · Beeren", price: "7,00" },
-      { name: "crêpes choco", desc: "Schoko · Banane · Beeren", price: "6,50" },
-      { name: "matcha brûlée", desc: "Knackig karamellisiert · Sesam", price: "6,50" },
-      { name: "matcha", desc: "Matcha-Creme · Erdbeeren · Blaubeeren", price: "6,50" },
+      { name: "Matcha", price: "7,50" },
+      { name: "Matcha Brûlée", price: "7,50" },
+      { name: "Crêpes Choco", price: "7,50" },
     ],
-    note: "Drei Sorten. Gerollt. Auf die Hand."
+    note: "Drei Sorten, gerollt, auf die Hand."
   },
+
+  // ══════════ 3 · GETRÄNKE ══════════
   {
-    id: "desserts", label: "Signature Desserts",
+    id: "matcha", label: "Iced Matcha & Hojicha Ceremonial",
     items: [
-      { name: "Matcha Tiramisu", price: "6,50", desc: "a, c, g" },
+      { name: "Velvet Matcha + Tiramisu", price: "8,50" },
+      { name: "Velvet Matcha + Banana Edition", price: "8,50" },
+      { name: "Misu Matcha Cloud", price: "7,00" },
+      { name: "Yuzu Matcha Cloud", price: "7,00" },
+      { name: "Matcha Classic HOT", price: "5,50" },
+      { name: "Hojicha HOT", price: "5,50" },
+      { name: "Matcha Classic", price: "5,50" },
+      { name: "Hojicha", price: "5,50" },
+      { name: "Strawberry Matcha", price: "5,50" },
+      { name: "Mango Matcha", price: "5,50" },
     ],
-    note: "Kuchen wechseln täglich — schaut an der Vitrine!"
-  },
-]
-
-// ─── Kuchen Zutaten/Allergene ─────────────────────────
-const ALLERGEN_LEGEND: Record<string, string> = {
-  'a': 'Gluten (Weizen)',
-  'c': 'Eier',
-  'g': 'Milch / Laktose',
-  'n': 'Sesam',
-}
-
-interface KuchenItem {
-  name: string
-  zutaten: string
-  allergene: string[]
-  tags?: string[]
-}
-
-const KUCHEN_BASIS: KuchenItem[] = [
-  {
-    name: 'Tiramisu Kaffee',
-    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Kaffee & Kakao',
-    allergene: ['a', 'c', 'g'],
+    note: "mit Agaven-Sirup | Milch: Kuhmilch · Hafermilch · Kokosmilch"
   },
   {
-    name: 'Tiramisu Matcha',
-    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Matcha',
-    allergene: ['a', 'c', 'g'],
+    id: "lemonade", label: "Lemonade & Water",
+    items: [
+      { name: "Premium Tafelwasser", desc: "medium, still · 0,5 l", price: "4,20" },
+      { name: "DeTox Water", desc: "Gurke · Zitrone · Minze · 1,0 l", price: "7,50" },
+      { name: "Passion Fruit", desc: "Maracuja-Nektar · Soda", price: "5,50" },
+      { name: "Yuzu Lemonade", desc: "Yuzu · Zitrone · Soda · Honig", price: "5,50" },
+      { name: "Passionate Mango", desc: "Maracuja · Mango-Nektar · Soda", price: "5,50" },
+      { name: "Orange Mint", desc: "Orangensaft · Minze · Soda", price: "5,50" },
+    ],
   },
   {
-    name: 'Frucht Tiramisu',
-    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Fruchtpüree, Gelatine',
-    allergene: ['a', 'c', 'g'],
+    id: "juice", label: "Slow-Juice Bar",
+    items: [
+      { name: "Orange Juice", desc: "frisch gepresster Orangensaft", price: "5,90" },
+      { name: "Russian Roulette", desc: "täglich frisch", price: "5,00" },
+      { name: "Golden Hour", desc: "Karotte · Apfel · Ingwer", price: "5,50" },
+      { name: "Green Glow", desc: "Apfel · Gurke · Ingwer · Zitrone", price: "5,50" },
+    ],
+    note: "0,3 l"
   },
   {
-    name: 'Mille Crepes Basis',
-    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Rapsöl, Gelatine',
-    allergene: ['a', 'c', 'g'],
-  },
-]
-
-const KUCHEN_SPECIALS: KuchenItem[] = [
-  {
-    name: 'Matcha Sesam Blaubeer Mille Crepes',
-    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Matcha, Sesam, Blaubeeren, Gelatine',
-    allergene: ['a', 'c', 'g', 'n'],
+    id: "freshblend", label: "Fresh Blend",
+    items: [
+      { name: "Watermelon Mint", desc: "Wassermelone · Minze · Zitrone", price: "5,90" },
+    ],
+    note: "0,3 l"
   },
   {
-    name: 'Earl Grey Blaubeer Chiffon',
-    zutaten: 'Sahne, Ei, Zucker, Mehl, Earl Grey Tee, Blaubeeren',
-    allergene: ['a', 'c', 'g'],
+    id: "wein-glas", label: "Wein vom Herzogenberg · Im Glas 0,2 l",
+    items: [
+      { name: "Weissburgunder", price: "6,50" },
+      { name: "Rosa Cuvée Rosé", price: "6,50" },
+      { name: "Weinschorle", desc: "mit Rosé oder Weißwein", price: "5,00" },
+    ],
+    note: "Weingut Wöhrwag · Untertürkheim · zehn Minuten von hier"
   },
   {
-    name: 'Bananen Miso Mille Crepes',
-    zutaten: 'Sahne, Ei, Mascarpone, Zucker, Mehl, Banane, Miso, Gelatine',
-    allergene: ['a', 'c', 'g'],
+    id: "wein-flaschen", label: "Wein · Flaschen White / Rosé",
+    items: [
+      { name: "Johanna Cuvée Weiss", desc: "unkompliziert · der Einstieg", price: "20,2 / 10,2" },
+      { name: "Riesling „Alte Reben\"", desc: "grüner Apfel · weißer Pfirsich", price: "20,5 / 10,5" },
+      { name: "Weissburgunder trocken", price: "20,5 / 10,5" },
+      { name: "Rosa Cuvée Rosé", desc: "Gewinner Rosé 2026 · Württemberger Weinmeisterschaft", price: "20,2 / 10,2" },
+      { name: "Riesling Kabinett Herzogenberg", desc: "feine Süße · unser Wein zu allem Scharfen", price: "25,0 / 15,0" },
+      { name: "Kreiden.Stein Riesling „Goldkapsel\"", desc: "das Aushängeschild des Hauses", price: "25,5 / 15,5" },
+      { name: "Kreiden.Stein Grauburgunder", desc: "weich · rund", price: "26,0 / 16,0" },
+      { name: "Sauvignon Blanc Herzogenberg", desc: "93 Falstaff-Punkte · VDP erste Lage", price: "29,9 / 19,9" },
+      { name: "Riesling GG Herzogenberg", desc: "Grosses Gewächs · Monopollage · die Spitze", price: "38,5 / 28,5" },
+    ],
+    note: "Preise: Flasche / Glas 0,2 l"
   },
   {
-    name: 'Matcha Mango Passionsfrucht Chiffon',
-    zutaten: 'Sahne, Ei, Zucker, Mehl, Matcha, Mango, Passionsfrucht',
-    allergene: ['a', 'c', 'g'],
+    id: "wein-rot", label: "Wein · Flaschen Red",
+    items: [
+      { name: "2022 Lemberger Herzogenberg", desc: "VDP erste Lage · unser einer Rote", price: "26,5 / 16,5" },
+    ],
+    note: "Preise: Flasche / Glas 0,2 l"
   },
   {
-    name: 'Ube Coconut Erdbeer Gateaux',
-    zutaten: 'Kokosmilch, Reismehl, Zucker, Ube, Erdbeeren, Kokosöl',
-    allergene: [],
-    tags: ['glutenfrei', 'laktosefrei'],
+    id: "sekt", label: "Kessler Sekt",
+    items: [
+      { name: "Rosé Hochgewächs", price: "25,0 / 15,0" },
+      { name: "Chardonnay Hochgewächs", price: "25,0 / 15,0" },
+    ],
+    note: "Preise: Flasche / Glas 0,2 l"
+  },
+  {
+    id: "bier", label: "Bier",
+    items: [
+      { name: "Kirin", desc: "japanisches Bier · mild & erfrischend", price: "3,90" },
+    ],
+  },
+  {
+    id: "coffee", label: "Coffee",
+    items: [
+      { name: "Espresso", price: "2,20" },
+      { name: "Espresso Doppio", price: "3,50" },
+      { name: "Espresso Macchiato", price: "2,90" },
+      { name: "Iced Latte", desc: "mit Agaven-Sirup", price: "3,90" },
+      { name: "Flat White", price: "3,90" },
+      { name: "Iced Americano", desc: "mit Agaven-Sirup", price: "3,50" },
+    ],
+    note: "Milch: Kuhmilch · Hafermilch · Kokosmilch"
+  },
+  {
+    id: "tea", label: "Tea",
+    items: [
+      { name: "Against Cold", desc: "Ingwer · Limette · Honig · Jasmintee", price: "3,90" },
+      { name: "Just Tea", desc: "Jasmintee", price: "3,90" },
+      { name: "Orange Mint Tea", desc: "Minze · Orange · Honig", price: "3,90" },
+      { name: "Raw Ginger", desc: "Ingwer · Honig · Jasmintee", price: "3,90" },
+    ],
   },
 ]
 
 const TAB_GROUPS = [
-  { label: "Coffee", cats: ["coffee"] },
-  { label: "Matcha", cats: ["matcha"] },
-  { label: "Lunch", cats: ["lunch"] },
-  { label: "Hiraki", cats: ["hiraki"] },
-  { label: "Hiraki Week", cats: ["hiraki-week"] },
-  { label: "Butter Tteok", cats: ["tteok"] },
-  { label: "Crêpes", cats: ["crepes"] },
-  { label: "Onigirazu", cats: ["onigirazu"] },
-  { label: "Bowls", cats: ["bowls"] },
-  { label: "Desserts", cats: ["desserts"] },
+  { label: "Essen", cats: ["hiraki", "small-bites", "onigirazu", "boosts", "bowls", "extra-protein", "yakumi"] },
+  { label: "Süßes", cats: ["tteok", "crepes"] },
+  { label: "Getränke", cats: ["matcha", "lemonade", "juice", "freshblend", "wein-glas", "wein-flaschen", "wein-rot", "sekt", "bier", "coffee", "tea"] },
 ]
+
+// Symbol-Legende für die Speisekarte
+const MENU_LEGEND = '🌱 vegan · ⭐ Empfehlung · 👑 Premium · ⭐⭐ Signature'
 
 // ─── Opening hours helper ─────────────────────────────
 interface SiteSettings {
@@ -379,6 +415,7 @@ export default function HomePage() {
             <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Speisekarte</p>
             <h2 className="text-2xl md:text-4xl font-bold text-[#3b1f0a] mb-3">Unsere Speisekarte</h2>
             <p className="text-stone-400 text-sm">Von Matcha bis Onigirazu — mit Liebe zubereitet</p>
+            <p className="text-stone-400 text-xs mt-3">{MENU_LEGEND}</p>
           </div>
 
           {/* Desktop Tabs */}
@@ -411,54 +448,6 @@ export default function HomePage() {
                           </div>
                         ))}
                       </div>
-                      {/* Kuchen Allergene inline in Desserts */}
-                      {catId === 'desserts' && (
-                        <div className="mt-8 space-y-6">
-                          <div>
-                            <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-3">Basis · Immer verfügbar</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {KUCHEN_BASIS.map(k => (
-                                <div key={k.name} className="bg-stone-50 rounded-xl p-3.5 border border-stone-100">
-                                  <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <span className="font-bold text-[#3b1f0a] text-sm">{k.name}</span>
-                                    <div className="flex gap-1 shrink-0">
-                                      {k.allergene.map(c => <span key={c} className="w-5 h-5 rounded-full bg-[#3b1f0a] text-white text-[9px] font-bold flex items-center justify-center uppercase">{c}</span>)}
-                                    </div>
-                                  </div>
-                                  <p className="text-[11px] text-stone-400">{k.zutaten}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[3px] mb-3">Specials · Wechselnd</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {KUCHEN_SPECIALS.map(k => (
-                                <div key={k.name} className="bg-stone-50 rounded-xl p-3.5 border border-stone-100">
-                                  <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-bold text-[#3b1f0a] text-sm">{k.name}</span>
-                                      {k.tags?.map(t => <span key={t} className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full uppercase">{t}</span>)}
-                                    </div>
-                                    <div className="flex gap-1 shrink-0">
-                                      {k.allergene.length > 0 ? k.allergene.map(c => <span key={c} className="w-5 h-5 rounded-full bg-[#C4975C] text-white text-[9px] font-bold flex items-center justify-center uppercase">{c}</span>) : <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">✓</span>}
-                                    </div>
-                                  </div>
-                                  <p className="text-[11px] text-stone-400">{k.zutaten}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-2">
-                            {Object.entries(ALLERGEN_LEGEND).map(([code, label]) => (
-                              <div key={code} className="flex items-center gap-1.5">
-                                <span className="w-4 h-4 rounded-full bg-[#3b1f0a] text-white text-[8px] font-bold flex items-center justify-center uppercase">{code}</span>
-                                <span className="text-[11px] text-stone-400">{label}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )
                 })}
@@ -468,57 +457,38 @@ export default function HomePage() {
 
           {/* Mobile Accordion */}
           <div className="md:hidden space-y-2">
-            {menuData.map(cat => (
-              <div key={cat.id} className="bg-white rounded-xl overflow-hidden shadow-sm">
-                <button onClick={() => setOpenAccordion(openAccordion === cat.id ? null : cat.id)}
-                  className="w-full flex justify-between items-center px-4 py-3.5 text-left">
-                  <span className="font-semibold text-sm text-[#3b1f0a]">{cat.label}</span>
-                  <span className={`material-symbols-outlined text-stone-400 text-lg transition-transform ${openAccordion === cat.id ? 'rotate-180' : ''}`}>expand_more</span>
-                </button>
-                {openAccordion === cat.id && (
-                  <div className="px-4 pb-4 space-y-1">
-                    {cat.note && <p className="text-[11px] text-[#C4975C] italic mb-2">{cat.note}</p>}
-                    {cat.items.map(item => (
-                      <div key={item.name} className="flex justify-between items-baseline py-1.5">
-                        <div>
-                          <span className="text-sm text-[#3b1f0a]">{item.name}</span>
-                          {'desc' in item && item.desc && <span className="text-[11px] text-stone-400 block">{item.desc}</span>}
-                        </div>
-                        <span className="text-sm font-bold text-[#C4975C] ml-3">{item.price} €</span>
-                      </div>
-                    ))}
-                    {/* Kuchen Allergene inline in mobile Desserts */}
-                    {cat.id === 'desserts' && (
-                      <div className="mt-4 space-y-4">
-                        <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[2px] pt-2">Zutaten & Allergene</p>
-                        {[...KUCHEN_BASIS, ...KUCHEN_SPECIALS].map(k => (
-                          <div key={k.name} className="bg-stone-50 rounded-lg p-3 border border-stone-100">
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-bold text-[#3b1f0a] text-[13px]">{k.name}</span>
-                                {k.tags?.map(t => <span key={t} className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full uppercase">{t}</span>)}
+            {TAB_GROUPS.map(group => {
+              const cats = group.cats.map(id => menuData.find(c => c.id === id)).filter(Boolean)
+              if (cats.length === 0) return null
+              return (
+                <div key={group.label} className="space-y-2">
+                  <p className="text-[11px] font-bold text-[#C4975C] uppercase tracking-[3px] pt-4 pb-1">{group.label}</p>
+                  {cats.map(cat => cat && (
+                    <div key={cat.id} className="bg-white rounded-xl overflow-hidden shadow-sm">
+                      <button onClick={() => setOpenAccordion(openAccordion === cat.id ? null : cat.id)}
+                        className="w-full flex justify-between items-center px-4 py-3.5 text-left">
+                        <span className="font-semibold text-sm text-[#3b1f0a]">{cat.label}</span>
+                        <span className={`material-symbols-outlined text-stone-400 text-lg transition-transform ${openAccordion === cat.id ? 'rotate-180' : ''}`}>expand_more</span>
+                      </button>
+                      {openAccordion === cat.id && (
+                        <div className="px-4 pb-4 space-y-1">
+                          {cat.note && <p className="text-[11px] text-[#C4975C] italic mb-2">{cat.note}</p>}
+                          {cat.items.map(item => (
+                            <div key={item.name} className="flex justify-between items-baseline py-1.5">
+                              <div>
+                                <span className="text-sm text-[#3b1f0a]">{item.name}</span>
+                                {'desc' in item && item.desc && <span className="text-[11px] text-stone-400 block">{item.desc}</span>}
                               </div>
-                              <div className="flex gap-0.5 shrink-0">
-                                {k.allergene.length > 0 ? k.allergene.map(c => <span key={c} className="w-5 h-5 rounded-full bg-[#3b1f0a] text-white text-[9px] font-bold flex items-center justify-center uppercase">{c}</span>) : <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">✓</span>}
-                              </div>
-                            </div>
-                            <p className="text-[11px] text-stone-400">{k.zutaten}</p>
-                          </div>
-                        ))}
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
-                          {Object.entries(ALLERGEN_LEGEND).map(([code, label]) => (
-                            <div key={code} className="flex items-center gap-1">
-                              <span className="w-4 h-4 rounded-full bg-[#3b1f0a] text-white text-[8px] font-bold flex items-center justify-center uppercase">{code}</span>
-                              <span className="text-[10px] text-stone-400">{label}</span>
+                              <span className="text-sm font-bold text-[#C4975C] ml-3">{item.price} €</span>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
