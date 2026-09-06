@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 
 type SiteSettings = Record<string, string>
@@ -62,6 +63,25 @@ export default function UeberUnsPage() {
             vegetarischen Super Mario.
           </p>
           <p>
+            Und zum Entdecken: unsere <strong className="text-[#3b1f0a]">Hiraki</strong> – knusprig gebackene Happen in 13 Sorten,
+            jede mit eigenem Finish. In zwei Bissen gegessen, einzeln oder im Set geteilt.
+          </p>
+
+          <figure className="my-8 not-prose">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-sm">
+              <Image
+                src="/images/about-hiraki.jpg"
+                alt="Hiraki bei O·MO·I – knusprige Nori-Happen mit Sushireis, Topping und Finish-Sauce"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 768px"
+              />
+            </div>
+            <figcaption className="text-center text-xs text-stone-400 mt-3">
+              Hiraki – 13 Sorten, jede mit eigenem Finish
+            </figcaption>
+          </figure>
+          <p>
             Dazu gibt es herzhafte <strong className="text-[#3b1f0a]">Bowls</strong> aus Sushireis, Avocado und Kimchi,
             hausgemachte <strong className="text-[#3b1f0a]">Slow Juices</strong> – und natürlich unser
             legendäres <strong className="text-[#3b1f0a]">Matcha Tiramisu</strong>.
@@ -74,6 +94,7 @@ export default function UeberUnsPage() {
           {[
             { emoji: '🍵', title: 'Matcha & Hojicha', desc: 'Ceremonial Grade aus Japan' },
             { emoji: '🔪', title: 'Signature Onigirazu', desc: 'Hot Red Tuna · Salmon · Chicken' },
+            { emoji: '🍙', title: 'Hiraki', desc: '13 Sorten · einzeln oder als Set' },
             { emoji: '🥗', title: 'O·MO·I Bowls', desc: 'Sushireis, Avocado, Kimchi, Nori' },
             { emoji: '🍋', title: 'Slow-Juice Bar', desc: 'DetoX Green Glow · Yuzu Lemonade' },
             { emoji: '🍰', title: 'Matcha Tiramisu', desc: 'Unser Signature Dessert' },

@@ -381,61 +381,30 @@ export default function HomePage() {
 
       {/* ═══ ABOUT ══════════════════════════════════════ */}
       <section className="py-16 md:py-24 px-4 md:px-6 max-w-6xl mx-auto" id="about">
-        <div className="text-center mb-10 scroll-reveal">
+        <div className="text-center mb-12 scroll-reveal">
           <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Über uns</p>
-          <h2 className="text-2xl md:text-4xl font-bold text-shimmer-gold mb-4">Brunch · Matcha · Onigirazu</h2>
-          <div className="w-8 h-0.5 bg-[#C4975C] mx-auto mb-8 rounded-full animate-line-expand" />
-          <div className="max-w-3xl mx-auto text-left md:text-center space-y-4 text-sm md:text-[15px] leading-relaxed text-stone-600">
-            <p>OMOI bedeutet auf Japanisch Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Genau das steckt in jedem Teller und jeder Tasse, die wir servieren.</p>
-            <p>Wir sind ein auf Matcha spezialisiertes Café mit Brunch- und Onigirazu-Küche im Herzen von Stuttgart. Unser Ceremonial-Grade-Matcha kommt direkt aus Japan – ob als klassischer Matcha HOT, cremiger Velvet Matcha mit Tiramisu oder erfrischender Yuzu Matcha Cloud.</p>
-            <p>Unsere Signature Onigirazu – japanische Onigiri-Sandwiches aus Nori, Sushireis und frischen Zutaten – sind das Herzstück unserer Küche. Von Hot Red Tuna über Teriyaki Dry-Aged Salmon bis zum vegetarischen Super Mario.</p>
-            <p>Und zum Entdecken: unsere Hiraki – knusprig gebackene Happen in 13 Sorten, jede mit eigenem Finish. In zwei Bissen gegessen, einzeln oder im Set geteilt.</p>
-            <p>Dazu gibt es herzhafte Bowls aus Sushireis, Avocado und Kimchi, hausgemachte Slow Juices – und natürlich unser legendäres Matcha Tiramisu.</p>
-            <p className="font-semibold text-[#3b1f0a] pt-1">Wir freuen uns auf dich. 🍵</p>
-          </div>
+          <h2 className="text-2xl md:text-4xl font-bold text-shimmer-gold mb-4">Willkommen bei O·MO·I</h2>
+          <div className="w-8 h-0.5 bg-[#C4975C] mx-auto mb-6 rounded-full animate-line-expand" />
+          <p className="text-stone-500 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
+            O·MO·I bedeutet Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Wir servieren handverlesenen Ceremonial Grade Matcha, kunstvoll zubereitete Signature Onigirazu und Bowls – Crafted with Heart, mitten in Stuttgart.
+          </p>
         </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: '🍵', title: 'Matcha & Hojicha', desc: 'Ceremonial Grade aus Japan' },
-            { icon: '🔪', title: 'Signature Onigirazu', desc: 'Hot Red Tuna · Salmon · Chicken' },
-            { icon: '🥗', title: 'O·MO·I Bowls', desc: 'Sushireis, Avocado, Kimchi, Nori' },
-            { icon: '🍋', title: 'Slow-Juice Bar', desc: 'DetoX Green Glow · Yuzu Lemonade' },
-            { icon: '🍰', title: 'Matcha Tiramisu', desc: 'Unser Signature Dessert' },
+            { img: '/images/about-matcha.jpg', title: 'Ceremonial Matcha', desc: 'Traditionell zubereitet aus den feinsten Teeblättern Japans.' },
+            { img: '/images/about-onigirazu.jpg', title: 'Signature Onigirazu', desc: 'Unser handgefertigtes Sushi-Sandwich, neu interpretiert.' },
+            { img: '/images/about-brunch.jpg', title: 'Artisan Brunch', desc: 'Matcha Tiramisu, Onigirazu & Bowl – alles auf einem Tisch.' },
           ].map((card, i) => (
-            <div key={card.title} className="scroll-reveal bg-white rounded-2xl p-5 text-center shadow-sm border border-stone-100" style={{ transitionDelay: `${i * 80}ms` }}>
-              <div className="text-2xl mb-2">{card.icon}</div>
-              <h3 className="font-bold text-[#3b1f0a] text-sm mb-1 leading-tight">{card.title}</h3>
-              <p className="text-stone-400 text-xs leading-relaxed">{card.desc}</p>
+            <div key={card.title} className={`scroll-reveal group card-hover bg-white rounded-2xl overflow-hidden shadow-sm`} style={{ transitionDelay: `${i * 150}ms` }}>
+              <div className="h-52 overflow-hidden relative">
+                <Image src={card.img} alt={card.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="(max-width: 768px) 100vw, 33vw" />
+              </div>
+              <div className="p-5">
+                <h3 className="font-bold text-[#3b1f0a] text-lg mb-1">{card.title}</h3>
+                <p className="text-stone-400 text-sm">{card.desc}</p>
+              </div>
             </div>
           ))}
-        </div>
-
-        <div className="bg-[#faf6f0] rounded-2xl px-6 py-6 md:px-8 md:py-7 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm border border-stone-100">
-          <div className="flex gap-3">
-            <span className="material-symbols-outlined text-[#C4975C] text-xl shrink-0 mt-0.5">location_on</span>
-            <div>
-              <p className="font-bold text-[#3b1f0a] mb-1">Adresse</p>
-              <p className="text-stone-500 leading-relaxed">Hauptstätter Str. 57<br />70178 Stuttgart-Mitte</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <span className="material-symbols-outlined text-[#C4975C] text-xl shrink-0 mt-0.5">schedule</span>
-            <div>
-              <p className="font-bold text-[#3b1f0a] mb-1">Öffnungszeiten</p>
-              <p className="text-stone-500 leading-relaxed">Di–Do: 12:00 – 21:00 · Fr–Sa: 12:00 – 22:00<br />So: 12:00 – 20:00<br /><span className="text-stone-400">Montag: Ruhetag · An Feiertagen wie sonntags</span></p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <span className="material-symbols-outlined text-[#C4975C] text-xl shrink-0 mt-0.5">alternate_email</span>
-            <div>
-              <p className="font-bold text-[#3b1f0a] mb-1">Kontakt</p>
-              <p className="text-stone-500 leading-relaxed">
-                <a href="mailto:hello@o-mo-i.de" className="text-[#C4975C] font-semibold hover:underline">hello@o-mo-i.de</a><br />
-                <a href="https://instagram.com/omoi.stuttgart" target="_blank" rel="noopener noreferrer" className="text-stone-500 hover:text-[#3b1f0a]">Instagram: @omoi.stuttgart</a>
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
