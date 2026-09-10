@@ -337,8 +337,9 @@ export default function HomePage() {
           <div className="w-40 h-20 rounded-2xl bg-white/10 animate-pulse mb-6" />
           <div className="w-48 h-4 rounded-full bg-white/10 animate-pulse mb-3" />
           <div className="w-64 h-3 rounded-full bg-white/8 animate-pulse mb-8" />
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             <div className="w-36 h-12 rounded-xl bg-[#C4975C]/30 animate-pulse" />
+            <div className="w-32 h-12 rounded-xl bg-white/10 animate-pulse" />
             <div className="w-32 h-12 rounded-xl bg-white/10 animate-pulse" />
           </div>
         </div>
@@ -360,12 +361,15 @@ export default function HomePage() {
           <p className="text-white/60 text-sm md:text-lg max-w-md italic animate-fade-up-d3">
             Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich.
           </p>
-          <div className="flex gap-3 mt-8 animate-fade-up-d4">
+          <div className="flex flex-wrap justify-center gap-3 mt-8 animate-fade-up-d4">
             <Link href="/booking" className="btn-shine px-8 py-3.5 bg-[#C4975C] text-white font-bold rounded-xl hover:bg-[#b3864d] transition-all active:scale-95 shadow-lg text-sm hover:shadow-[0_8px_30px_rgba(196,151,92,0.4)]">
               Tisch reservieren
             </Link>
             <a href="#menu" className="px-8 py-3.5 border-2 border-white/40 text-white font-bold rounded-xl hover:bg-white/10 hover:border-white/60 transition-all active:scale-95 text-sm">
               Speisekarte
+            </a>
+            <a href="/bestellen" target="_blank" rel="noopener noreferrer" className="px-8 py-3.5 border-2 border-white/40 text-white font-bold rounded-xl hover:bg-white/10 hover:border-white/60 transition-all active:scale-95 text-sm">
+              Take Away
             </a>
           </div>
           {/* Open status */}

@@ -4,6 +4,17 @@ import type { NextConfig } from "next";
 const LOYALTY_ORIGIN = process.env.LOYALTY_ORIGIN;
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    // /bestellen → trang đặt Take Away trên Lightspeed.
+    // permanent:false (307) → không cache, dễ đổi link sau này.
+    return [
+      {
+        source: "/bestellen",
+        destination: "https://mylightspeed.app/SXTFYWPE/C-ordering",
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     if (!LOYALTY_ORIGIN) return [];
     // Proxy /Stempel/* sang app loyalty (Next 14, basePath=/Stempel) trên Render.
