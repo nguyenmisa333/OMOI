@@ -356,7 +356,7 @@ export default function HomePage() {
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
           <Image src="/images/omoi-logo.png" alt="O·MO·I" width={320} height={160} className="h-28 md:h-40 object-contain mb-6 animate-logo-float" style={{ width: 'auto', height: 'auto' }} priority />
           <p className="text-white/90 text-sm md:text-base uppercase tracking-[0.3em] font-medium mb-2 animate-fade-up-d2">
-            Brunch · Matcha · Onigirazu
+            MATCHA · ONIGIRAZU · CAKE
           </p>
           <p className="text-white/60 text-sm md:text-lg max-w-md italic animate-fade-up-d3">
             Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich.
@@ -390,14 +390,14 @@ export default function HomePage() {
           <h2 className="text-2xl md:text-4xl font-bold text-shimmer-gold mb-4">Willkommen bei O·MO·I</h2>
           <div className="w-8 h-0.5 bg-[#C4975C] mx-auto mb-6 rounded-full animate-line-expand" />
           <p className="text-stone-500 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
-            O·MO·I bedeutet Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Wir servieren handverlesenen Ceremonial Grade Matcha, kunstvoll zubereitete Signature Onigirazu und Bowls – Crafted with Heart, mitten in Stuttgart.
+            O·MO·I bedeutet Gefühl, Gedanke, Sehnsucht und Liebe – alles zugleich. Wir servieren handverlesenen Ceremonial Grade Matcha, kunstvoll zubereitete Signature Onigirazu und hausgemachte Cakes – Crafted with Heart, mitten in Stuttgart.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { img: '/images/about-matcha.jpg', title: 'Ceremonial Matcha', desc: 'Traditionell zubereitet aus den feinsten Teeblättern Japans.' },
             { img: '/images/about-onigirazu.jpg', title: 'Signature Onigirazu', desc: 'Unser handgefertigtes Sushi-Sandwich, neu interpretiert.' },
-            { img: '/images/about-brunch.jpg', title: 'Artisan Brunch', desc: 'Matcha Tiramisu, Onigirazu & Bowl – alles auf einem Tisch.' },
+            { img: '/images/about-brunch.jpg', title: 'Hausgemachte Cakes', desc: 'Matcha Tiramisu, Cakes & mehr – mit Liebe gebacken.' },
           ].map((card, i) => (
             <div key={card.title} className={`scroll-reveal group card-hover bg-white rounded-2xl overflow-hidden shadow-sm`} style={{ transitionDelay: `${i * 150}ms` }}>
               <div className="h-52 overflow-hidden relative">
@@ -418,7 +418,7 @@ export default function HomePage() {
           <div className="text-center mb-10">
             <p className="text-[10px] font-bold text-[#C4975C] uppercase tracking-[4px] mb-3">Speisekarte</p>
             <h2 className="text-2xl md:text-4xl font-bold text-[#3b1f0a] mb-3">Unsere Speisekarte</h2>
-            <p className="text-stone-400 text-sm">Von Matcha bis Onigirazu — mit Liebe zubereitet</p>
+            <p className="text-stone-400 text-sm">Von Matcha bis Cake — mit Liebe zubereitet</p>
             <p className="text-stone-400 text-xs mt-3">{MENU_LEGEND}</p>
           </div>
 
