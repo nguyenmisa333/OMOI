@@ -535,6 +535,25 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══ FLOATING WHATSAPP BUTTON ═══════════════════ */}
+      <a
+        href="https://wa.me/4971139019070"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[85%] max-w-2xl flex items-center justify-between gap-3 px-4 py-3 bg-[#128C7E] text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+            <Image src="/images/omoi-logo.png" alt="O·MO·I" width={40} height={40} className="object-contain p-0.5" />
+          </div>
+          <div className="text-left">
+            <p className="font-bold text-base">Chat auf WhatsApp</p>
+            <p className="text-white/70 text-xs">App öffnen</p>
+          </div>
+        </div>
+        <span className="material-symbols-outlined text-3xl flex-shrink-0">arrow_forward</span>
+      </a>
+
       {/* ═══ ÖFFNUNGSZEITEN + KONTAKT ═══════════════════ */}
       <section className="py-16 md:py-24 pb-28 px-4 md:px-6 bg-[#3b1f0a]" id="kontakt">
         <div className="max-w-6xl mx-auto">
