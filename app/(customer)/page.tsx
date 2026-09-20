@@ -271,6 +271,7 @@ function getDayHours(s: SiteSettings, dow: number) {
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState(0)
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
+  const [menuImage, setMenuImage] = useState<number | null>(null)
   const [site, setSite] = useState<SiteSettings>(defaultHours)
   const [mounted, setMounted] = useState(false)
   const [currentDow, setCurrentDow] = useState(-1)
@@ -302,6 +303,18 @@ export default function HomePage() {
       if (d.menu && d.menu.length > 0) setMenuData(d.menu)
     }).catch(() => {})
   }, [])
+
+  // Menu image lightbox — Esc to close + lock body scroll while open
+  useEffect(() => {
+    if (menuImage === null) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuImage(null) }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [menuImage])
 
   // Separate observer — runs AFTER mounted so DOM elements exist
   useEffect(() => {
@@ -422,6 +435,23 @@ export default function HomePage() {
             <p className="text-stone-400 text-xs mt-3">{MENU_LEGEND}</p>
           </div>
 
+          {/* Menu image cards — click to zoom */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12 max-w-3xl mx-auto">
+            {[1, 2].map(n => (
+              <button key={n} onClick={() => setMenuImage(n)}
+                className="group relative rounded-2xl overflow-hidden shadow-md bg-white ring-1 ring-stone-200/70 hover:shadow-xl transition-all"
+                aria-label={`Speisekarte Seite ${n} vergrößern`}>
+                <Image src={`/images/menu-seite-${n}-thumb.jpg`} alt={`OMOI Speisekarte Seite ${n}`}
+                  width={1400} height={990}
+                  className="w-full h-auto transition-transform duration-300 group-hover:scale-[1.03]" />
+                <span className="absolute bottom-3 right-3 flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#3b1f0a]/85 text-white text-xs font-semibold backdrop-blur-sm">
+                  <span className="material-symbols-outlined text-base">zoom_in</span>
+                  Seite {n}
+                </span>
+              </button>
+            ))}
+          </div>
+
           {/* Desktop Tabs */}
           <div className="hidden md:block">
             <div className="flex justify-center gap-2 mb-8 flex-wrap">
@@ -495,6 +525,22 @@ export default function HomePage() {
             })}
           </div>
         </div>
+
+        {/* Menu image lightbox */}
+        {menuImage !== null && (
+          <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8"
+            onClick={() => setMenuImage(null)}>
+            <button onClick={() => setMenuImage(null)} aria-label="Schließen"
+              className="absolute top-4 right-4 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-white/90 text-[#3b1f0a] shadow-lg hover:bg-white transition-colors">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <div className="relative max-w-6xl w-full max-h-[90dvh] overflow-auto rounded-xl" onClick={e => e.stopPropagation()}>
+              <Image src={`/images/menu-seite-${menuImage}.jpg`} alt={`OMOI Speisekarte Seite ${menuImage}`}
+                width={2400} height={1697} priority
+                className="w-full h-auto rounded-xl" />
+            </div>
+          </div>
+        )}
       </section>
       {/* ═══ QUICK BOOKING ══════════════════════════════ */}
       <section className="py-16 md:py-24 px-4 md:px-6" id="reservieren">
